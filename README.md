@@ -22,7 +22,7 @@ int main() {
 
     Logger *logger = log->getLogger("testLogger",LOG_DEBUG); //获取日志控制器
 
-    log->addHandler(consoleHandler("test")); //为日志对象添加控制台处理器
+    logger->addHandler(consoleHandler("test")); //为日志对象添加控制台处理器
 
     logger->info("This is an info message");
     logger->error("你好,这是一个错误消息%s", "123");
@@ -43,7 +43,9 @@ int main() {
     // Your code goes here
     Logging *log = createLogging();
     Logger *logger = log->getLogger("testLogger",LOG_DEBUG);
-    log->addHandler(fileHandler("test"));   //为日志对象添加文件处理器
+    
+    logger->addHandler(consoleHandler("test"));   //为日志对象添加文件处理器
+
     logger->info("This is an info message");
     logger->error("你好,这是一个错误消息%s", "123");
     logger->fatal("This is an fatal message");
