@@ -1,0 +1,21 @@
+cmake_minimum_required( VERSION 3.28)
+
+project(Logging)
+
+
+aux_source_directory(${CMAKE_SOURCE_DIR}/src SRC)
+
+set(LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+set(ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
+
+include_directories(${CMAKE_SOURCE_DIR}/include)
+
+# add_library(${PROJECT_NAME} ${SRC})
+# add_library(${PROJECT_NAME} SHARED ${SRC})
+
+
+add_executable(${PROJECT_NAME}main main.c ${SRC})
+
+
+
