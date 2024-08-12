@@ -39,6 +39,10 @@ typedef struct Logger
     void (*warning)(const char* format, ...);
     void (*info)(const char* format, ...);
     void (*debug)(const char* format, ...);
+
+    void (*addHandler)(log_Handler* handler);
+    // void (*addFormat)(const char* format);
+    // void (*addFilter)(const char* filter);
 } Logger;
 
 
@@ -46,15 +50,13 @@ typedef struct Logger
 typedef struct Logging {
     Logger* (*getLogger)(const char* name, log_level level);
     log_status (*setLevel)(Logger* logger, log_level level);
-    // void (*addFormat)(const char* format);
-    // void (*addFilter)(const char* filter);
-    void (*addHandler)(log_Handler* handler);
 } Logging;
 
 
 
-Logging* createLogging();
+Logging* createLogging();                        //创建日志操作器
 log_status destroyLogging(Logging* logging);
+Logger* getCurrentLogger(void);
 
 
 log_Handler* fileHandler(const char* name);     //文件处理器

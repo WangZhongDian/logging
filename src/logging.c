@@ -1,3 +1,8 @@
+/********************************************
+* @Date: 2024 08 12
+* @Description: 日志模块
+********************************************/
+
 #include "logging.h"
 
 Logger* G_LOGGER = NULL;
@@ -23,7 +28,9 @@ static void getTimeStr(char * timeStr){
     strcpy(timeStr, _timeStr);
 }
 
-
+/**
+* @description : 添加日志处理器
+*/
 static void addHandler(log_Handler* handler){
     if (G_LOGGER == NULL){
         return;
@@ -31,6 +38,9 @@ static void addHandler(log_Handler* handler){
     G_LOGGER->handler = handler;
 }
 
+/**
+* @description : 内置日志记录函数
+*/
 static void _builtin_log(char* level, const char *color, const char* format, ...){
     if (G_LOGGER == NULL){
         return;
@@ -121,6 +131,8 @@ static Logger* getLogger(const char* name, log_level level){
     logger->info = info;
     logger->debug = debug;
 
+    logger->addHandler = addHandler;
+
     logger->level = level;
     logger->handler = NULL;
     logger->name = name;
@@ -136,11 +148,12 @@ static Logger* getLogger(const char* name, log_level level){
 Logging* createLogging(){
     Logging* logging = (Logging*)malloc(sizeof(Logging));
     logging->getLogger = getLogger;
-    logging->addHandler = addHandler;
     return logging;
 }
 
-
+/**
+* @description :销毁日志对象
+*/
 log_status destroyLogging(Logging* logging){
     if (logging == NULL){
         return L_ERROR;
@@ -155,4 +168,16 @@ log_status destroyLogging(Logging* logging){
     }
     free(logging);
     return L_OK;
+}
+
+
+/**
+* @description :获取当前日志操作对象
+* @return 当前唯一的日志操作对象
+*/
+Logger* getCurrentLogger(void){
+    if (G_LOGGER == NULL){
+        return NULL;
+    }
+    return G_LOGGER;
 }
