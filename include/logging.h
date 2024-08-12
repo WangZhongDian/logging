@@ -7,8 +7,10 @@
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
+#include <stdbool.h>
 
 typedef enum {
+    LOG_FATAL,
     LOG_ERROR,
     LOG_WARNING,
     LOG_INFO,
@@ -21,8 +23,8 @@ typedef enum {
 } log_status;
 
 typedef struct Handler {
-    FILE* file;
-    log_level level;
+    void* out;
+    bool apply_color;
 } log_Handler;
 
 
@@ -31,6 +33,8 @@ typedef struct Logger
 {
     log_level level;
     log_Handler* handler;
+    const char* name;
+    void (*fatal)(const char* format, ...);
     void (*error)(const char* format, ...);
     void (*warning)(const char* format, ...);
     void (*info)(const char* format, ...);
@@ -50,8 +54,11 @@ typedef struct Logging {
 
 
 Logging* createLogging();
+log_status destroyLogging(Logging* logging);
 
 
-log_Handler* fileHandler(const char* name,log_level level);
+log_Handler* fileHandler(const char* name);     //文件处理器
+log_Handler* consoleHandler(const char* name); //控制台处理器
+
 
 #endif // __LOGGING_H
