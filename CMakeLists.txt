@@ -2,6 +2,7 @@ cmake_minimum_required( VERSION 3.28)
 
 project(Logging)
 
+
 aux_source_directory(${CMAKE_SOURCE_DIR}/src SRC)
 
 set(LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
@@ -16,4 +17,8 @@ else()
     add_library(${PROJECT_NAME} ${SRC})
 endif()
 
+if (SKIPTEST)
+else()
+add_executable(test_main ${CMAKE_SOURCE_DIR}/test_package/main.c ${SRC})
+endif()
 

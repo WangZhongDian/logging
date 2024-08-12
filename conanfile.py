@@ -40,6 +40,7 @@ class loggingRecipe(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
+        tc.variables["SKIPTEST"]=True
         if self.options.shared:
             tc.variables["SHARED"] = True
         else:
@@ -49,7 +50,8 @@ class loggingRecipe(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure()
-        cmake.build()
+        cmake.build(target="Logging")
+
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
