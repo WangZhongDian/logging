@@ -17,7 +17,8 @@ else()
     add_library(${PROJECT_NAME} ${SRC})
 endif()
 
-
+if (SKIPTEST)
+else()
 add_executable(test_main ${CMAKE_SOURCE_DIR}/test_package/main.c ${SRC})
-
+endif()
 
