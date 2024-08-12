@@ -12,7 +12,7 @@ class loggingRecipe(ConanFile):
     version = "0.1.0"
     license = "MIT"
     author = "321640253@qq.com"
-    url = "https://github.com/yourusername/logging"
+    url = "https://github.com/WangZhongDian/logging.git"
     description = "一个纯C的简单易用的日志库"
     topics = ("logging", "C", "simple", "easy-to-use", "log","Logging")
 
