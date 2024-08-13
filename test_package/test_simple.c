@@ -4,7 +4,6 @@
 int main() {
     Logging *log = createLogging();
     Logger *logger = log->getLogger("testLogger",LOG_DEBUG);
-    // logger->addHandler(fileHandler("test"));
     logger->addHandler(consoleHandler("test"));
 
     logger->info("This is an info message");
@@ -12,9 +11,6 @@ int main() {
     logger->fatal("This is an fatal message");
     logger->debug("This is a debug message");
     logger->warning("This is a warning message%s", "123");
-
-    Logger *logger1 = getCurrentLogger();
-    logger1->info("This is an info message from logger1");
 
     destroyLogging(log);
     return 0;
