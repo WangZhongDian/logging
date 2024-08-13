@@ -40,10 +40,8 @@ static void addHandler(log_Handler* handler){
         return;
     }
 
-    if(G_LOGGER->handler->need_free){
-        G_LOGGER->handler->_free(G_LOGGER->handler);
-    }
-    free(G_LOGGER->handler);
+    G_LOGGER->handler->_free(G_LOGGER->handler);
+    
     G_LOGGER->handler = handler;
 }
 
@@ -56,10 +54,8 @@ void addInterceptor(log_Interceptor* Interceptor){
         return;
     }
 
-    if(G_LOGGER->interceptor->need_free){
-        G_LOGGER->interceptor->_free(G_LOGGER->interceptor);
-    }
-    free(G_LOGGER->interceptor);
+    G_LOGGER->interceptor->_free(G_LOGGER->interceptor);
+
     G_LOGGER->interceptor = Interceptor;
 }
 
@@ -182,6 +178,8 @@ static Logger* getLogger(const char* name, log_level level){
     return G_LOGGER;
 }
 
+
+
 /**
 * @description :创建一个日志对象
 * @return :Logging* 返回一个日志对象
@@ -201,12 +199,11 @@ log_status destroyLogging(Logging* logging){
     }
     if (G_LOGGER != NULL){
         if (G_LOGGER->handler != NULL){
-            if(G_LOGGER->handler->need_free)G_LOGGER->handler->_free(G_LOGGER->handler);
-            free(G_LOGGER->handler);
+            G_LOGGER->handler->_free(G_LOGGER->handler);
         }
 
         if (G_LOGGER->interceptor != NULL){
-            if(G_LOGGER->interceptor->need_free)G_LOGGER->interceptor->_free(G_LOGGER->interceptor);
+            G_LOGGER->interceptor->_free(G_LOGGER->interceptor);
         }
 
         free(G_LOGGER);

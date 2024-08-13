@@ -12,6 +12,7 @@
 */
 static void __freeFileHandler(log_Handler* handler){
     fclose(handler->out);
+    free(handler);
 }
 
 /**
@@ -26,9 +27,13 @@ log_Handler* fileHandler(const char* name){
     log_Handler* handler = (log_Handler*)malloc(sizeof(log_Handler));
     handler->out = fp;
     handler->apply_color = false;
-    handler->need_free = true;
     handler->_free = __freeFileHandler;
     return handler;
+}
+
+
+static void __freeConsoleHandler(log_Handler* handler){
+    free(handler);
 }
 
 
@@ -41,7 +46,6 @@ log_Handler* consoleHandler(const char* name){
     log_Handler* handler = (log_Handler*)malloc(sizeof(log_Handler));
     handler->out = stdout;
     handler->apply_color = true;
-    handler->need_free = false;
-    handler->_free = NULL;
+    handler->_free = __freeConsoleHandler;
     return handler;
 }
