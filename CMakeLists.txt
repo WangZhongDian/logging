@@ -19,6 +19,7 @@ endif()
 
 if (SKIPTEST)
 else()
-add_executable(test_main ${CMAKE_SOURCE_DIR}/test_package/main.c ${SRC})
+    add_executable(test_simple ${CMAKE_SOURCE_DIR}/test_package/test_simple.c ${SRC})
+    add_executable(test_interceptor ${CMAKE_SOURCE_DIR}/test_package/test_interceptor.c ${SRC})
 endif()
 

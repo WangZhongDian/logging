@@ -35,13 +35,38 @@ static void addHandler(log_Handler* handler){
     if (G_LOGGER == NULL){
         return;
     }
+    if (G_LOGGER->handler == NULL){
+        G_LOGGER->handler = handler;
+        return;
+    }
+
+    if(G_LOGGER->handler->need_free){
+        G_LOGGER->handler->_free(G_LOGGER->handler);
+    }
+    free(G_LOGGER->handler);
     G_LOGGER->handler = handler;
+}
+
+void addInterceptor(log_Interceptor* Interceptor){
+    if (G_LOGGER == NULL){
+        return;
+    }
+    if (G_LOGGER->interceptor == NULL){
+        G_LOGGER->interceptor = Interceptor;
+        return;
+    }
+
+    if(G_LOGGER->interceptor->need_free){
+        G_LOGGER->interceptor->_free(G_LOGGER->interceptor);
+    }
+    free(G_LOGGER->interceptor);
+    G_LOGGER->interceptor = Interceptor;
 }
 
 /**
 * @description : 内置日志记录函数
 */
-static void _builtin_log(char* level, const char *color, const char* format, ...){
+static void _builtin_log(char* level, const char *color, const char* message, ...){
     if (G_LOGGER == NULL){
         return;
     }
@@ -51,63 +76,77 @@ static void _builtin_log(char* level, const char *color, const char* format, ...
     char timeStr[20];
     getTimeStr(timeStr);
     char logStr[LOG_BUFFER_SIZE];
-    if (G_LOGGER->handler->apply_color) sprintf(logStr, "%s %s%s%s %s\n", timeStr, color,level,RESET, format);
-    else sprintf(logStr, "%s %s %s\n", timeStr, level, format);
-    fputs(logStr, G_LOGGER->handler->out);
+
+    log_Handler * handler = G_LOGGER->handler;
+
+    //通过拦截器
+    if (G_LOGGER->interceptor != NULL){
+        if(G_LOGGER->interceptor->_dispose(level,message)){
+            if(G_LOGGER->interceptor->handler != NULL){
+                handler = G_LOGGER->interceptor->handler;
+            }
+        }
+    }
+
+    //判断处理器是否应用颜色
+    if (handler->apply_color) sprintf(logStr, "%s %s%s%s %s\n", timeStr, color,level,RESET, message);
+    else sprintf(logStr, "%s %s %s\n", timeStr, level, message);
+
+    fputs(logStr, handler->out);
 }
 
 
 //*************************记录日志******************************* */
-static void fatal(const char* format, ...){
+static void fatal(const char* message, ...){
     if (G_LOGGER->level >= LOG_ERROR){
         char logStr[LOG_BUFFER_SIZE];
         va_list args;
-        va_start(args, format);
-        vsprintf(logStr, format, args);
+        va_start(args, message);
+        vsprintf(logStr, message, args);
         va_end(args);
         _builtin_log("Fatal",RED, logStr, args);
     }
 }
 
-static void error(const char* format, ...){
+static void error(const char* message, ...){
     if (G_LOGGER->level >= LOG_ERROR){
         char logStr[LOG_BUFFER_SIZE];
         va_list args;
-        va_start(args, format);
-        vsprintf(logStr, format, args);
+        va_start(args, message);
+        vsprintf(logStr, message, args);
         va_end(args);
         _builtin_log("Error",RED, logStr, args);
     }
 }
 
-static void warning(const char* format, ...){
+static void warning(const char* message, ...){
     if (G_LOGGER->level >= LOG_WARNING){
         char logStr[LOG_BUFFER_SIZE];
         va_list args;
-        va_start(args, format);
-        vsprintf(logStr, format, args);
+        va_start(args, message);
+        vsprintf(logStr, message, args);
         va_end(args);
         _builtin_log("Warning",YELLOW, logStr, args);
     }
 }
 
-static void info(const char* format, ...){
+static void info(const char* message, ...){
     if (G_LOGGER->level >= LOG_INFO){
         char logStr[LOG_BUFFER_SIZE];
         va_list args;
-        va_start(args, format);
-        vsprintf(logStr, format, args);
+        va_start(args, message);
+        vsprintf(logStr, message, args);
         va_end(args);
         _builtin_log("Info",GREEN, logStr, args);
     }
 }
 
-static void debug(const char* format, ...){
+static void debug(const char* message, ...){
     if (G_LOGGER->level >= LOG_DEBUG){
         char logStr[LOG_BUFFER_SIZE];
         va_list args;
-        va_start(args, format);
-        vsprintf(logStr, format, args);
+        va_start(args, message);
+        vsprintf(logStr, message, args);
         va_end(args);
         _builtin_log("Debug",CYAN, logStr, args);
     }
@@ -132,10 +171,12 @@ static Logger* getLogger(const char* name, log_level level){
     logger->debug = debug;
 
     logger->addHandler = addHandler;
+    logger->addInterceptor = addInterceptor;
 
     logger->level = level;
     logger->handler = NULL;
     logger->name = name;
+    logger->interceptor = NULL;
 
     G_LOGGER = logger;
     return G_LOGGER;
@@ -160,9 +201,14 @@ log_status destroyLogging(Logging* logging){
     }
     if (G_LOGGER != NULL){
         if (G_LOGGER->handler != NULL){
-            fclose(G_LOGGER->handler->out);
+            if(G_LOGGER->handler->need_free)G_LOGGER->handler->_free(G_LOGGER->handler);
             free(G_LOGGER->handler);
         }
+
+        if (G_LOGGER->interceptor != NULL){
+            if(G_LOGGER->interceptor->need_free)G_LOGGER->interceptor->_free(G_LOGGER->interceptor);
+        }
+
         free(G_LOGGER);
         G_LOGGER = NULL;
     }
@@ -181,3 +227,5 @@ Logger* getCurrentLogger(void){
     }
     return G_LOGGER;
 }
+
+
