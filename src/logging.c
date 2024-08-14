@@ -88,7 +88,7 @@ static void _builtin_log(char* level, const char *color, const char* message, ..
     if (handler->apply_color) sprintf(logStr, "%s %s%s%s %s\n", timeStr, color,level,RESET, message);
     else sprintf(logStr, "%s %s %s\n", timeStr, level, message);
 
-    fputs(logStr, handler->out);
+    handler->output(handler,logStr);
 }
 
 

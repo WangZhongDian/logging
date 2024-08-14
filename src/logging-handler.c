@@ -11,8 +11,12 @@
 * @return 
 */
 static void __freeFileHandler(log_Handler* handler){
-    fclose(handler->out);
+    fclose(handler->stream);
     free(handler);
+}
+
+static void outputFileHandler(log_Handler *handler, const char * message){
+    fputs(message,handler->stream);
 }
 
 /**
@@ -25,17 +29,23 @@ log_Handler* fileHandler(const char* name){
     sprintf(new_file_name, "%s.log", name);
     FILE* fp = fopen(new_file_name, "at");
     log_Handler* handler = (log_Handler*)malloc(sizeof(log_Handler));
-    handler->out = fp;
+    handler->stream = fp;
     handler->apply_color = false;
     handler->_free = __freeFileHandler;
+    handler->output = outputFileHandler;
     return handler;
 }
+
 
 
 static void __freeConsoleHandler(log_Handler* handler){
     free(handler);
 }
 
+
+static void outputConsoleHandler(log_Handler* handler,const char * message){
+    fputs(message,handler->stream);
+}
 
 /**
 * @description ：控制台日志处理器
@@ -44,8 +54,9 @@ static void __freeConsoleHandler(log_Handler* handler){
 */
 log_Handler* consoleHandler(const char* name){
     log_Handler* handler = (log_Handler*)malloc(sizeof(log_Handler));
-    handler->out = stdout;
+    handler->stream = stdout;
     handler->apply_color = true;
     handler->_free = __freeConsoleHandler;
+    handler->output = outputConsoleHandler;
     return handler;
 }

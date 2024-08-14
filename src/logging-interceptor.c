@@ -51,6 +51,11 @@ static bool kmp_search(char *substr, char *master) {
 }
 
 
+/**
+* @description 处理
+* @param 
+* @return 
+*/
 static bool _disposeSubstring(char* level,const char *message, ...){
     int count = 0;
 
@@ -61,9 +66,6 @@ static bool _disposeSubstring(char* level,const char *message, ...){
     while (G_keywords[count] != NULL)
     {
         if (kmp_search(G_keywords[count],(char*)message)) {
-            if(G_interceptor->handler != NULL) {
-
-            }
             return true;
         }
         count++;
