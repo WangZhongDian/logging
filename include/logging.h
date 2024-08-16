@@ -23,19 +23,19 @@ typedef enum {
 } log_status;
 
 typedef struct log_Handler {
-    void* out;
+    void* stream;
     bool apply_color;
-    bool need_free;             //是否有资源释放需求
     void (*_free)(struct log_Handler* handler);//释放资源
+    void (*output)(struct log_Handler* handler,const char* message);
 } log_Handler;
 
 
 typedef struct log_Interceptor {
     log_level level;                                        //拦截级别
     log_Handler* handler;                                   //拦截目标处理器
-    bool need_free;                                         //是否有资源释放需求
     bool (*_dispose)(char* level,const char *message, ...); //拦截触发器
     void (*_free)(struct log_Interceptor* Interceptor);     //释放资源
+
 }  log_Interceptor;
 
 

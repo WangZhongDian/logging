@@ -9,7 +9,7 @@ static log_Interceptor* G_interceptor = NULL;
 
 static char **G_keywords = NULL;
 
-void get_next(char *str, int *next) {
+static void get_next(char *str, int *next) {
     next[1] = 0;
     int i=1;
     int j=0;
@@ -24,7 +24,7 @@ void get_next(char *str, int *next) {
 }
 
 
-bool kmp_search(char *substr, char *master) {
+static bool kmp_search(char *substr, char *master) {
     int i = 0;
     int j = 0;
     int substrlen = strlen(substr);
@@ -51,6 +51,11 @@ bool kmp_search(char *substr, char *master) {
 }
 
 
+/**
+* @description 处理
+* @param 
+* @return 
+*/
 static bool _disposeSubstring(char* level,const char *message, ...){
     int count = 0;
 
@@ -61,9 +66,6 @@ static bool _disposeSubstring(char* level,const char *message, ...){
     while (G_keywords[count] != NULL)
     {
         if (kmp_search(G_keywords[count],(char*)message)) {
-            if(G_interceptor->handler != NULL) {
-
-            }
             return true;
         }
         count++;
@@ -73,7 +75,7 @@ static bool _disposeSubstring(char* level,const char *message, ...){
 }
 
 /**
-* @description : 释放内存
+* @description : 完成拦截器自我释放内存
 */
 static void _freeSubstring(log_Interceptor* interceptor) {
     int sum = 0;
@@ -84,6 +86,10 @@ static void _freeSubstring(log_Interceptor* interceptor) {
     free(G_keywords);
     G_keywords = NULL;
 
+    if(interceptor->handler != NULL){
+        interceptor->handler->_free(interceptor->handler);
+    }
+
     free(interceptor);
 }
 
@@ -93,7 +99,6 @@ static void _freeSubstring(log_Interceptor* interceptor) {
 log_Interceptor* substringInterceptor(char *keywords[], int count, log_level level, log_Handler* handler) {
     log_Interceptor* interceptor = (log_Interceptor*)malloc(sizeof(log_Interceptor));
     interceptor->_dispose = _disposeSubstring;
-    interceptor->need_free = true;
     interceptor->handler = handler;
     interceptor->level = level;
     interceptor->_free = _freeSubstring;

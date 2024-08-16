@@ -1,6 +1,5 @@
 #include "logging.h"
 
-
 int main() {
     Logging *log = createLogging();
     Logger *logger = log->getLogger("testLogger",LOG_DEBUG);
