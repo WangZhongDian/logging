@@ -1,8 +1,9 @@
 #include "logging.h"
+#include <stdio.h>
 
 int main() {
-    Logging *log = createLogging();
-    Logger *logger = log->getLogger("testLogger",LOG_DEBUG);
+    Logging *log    = createLogging();
+    Logger  *logger = log->getLogger("testLogger", LOG_DEBUG);
     logger->addHandler(consoleHandler("test"));
 
     logger->info("This is an info message");
@@ -11,9 +12,10 @@ int main() {
     logger->debug("This is a debug message");
     logger->warning("This is a warning message%s", "123");
 
-    char *test1[] = {"123", "你好"};//要拦截的字符串
-    //添加拦截器，将拦截到的日志重定向到拦截器的专属处理器中
-    log_Interceptor * tint = substringInterceptor(test1,2,LOG_DEBUG,fileHandler("被拦截")); 
+    char *test1[] = {"123", "你好"}; // 要拦截的字符串
+    // 添加拦截器，将拦截到的日志重定向到拦截器的专属处理器中
+    log_Interceptor *tint =
+        substringInterceptor(test1, 2, LOG_DEBUG, fileHandler("被拦截"));
     logger->addInterceptor(tint);
     printf("Interceptor added\n");
 

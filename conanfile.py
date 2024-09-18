@@ -6,10 +6,9 @@ from conan import tools
 import os
 
 
-
 class loggingRecipe(ConanFile):
     name = "logging"
-    version = "0.1.1"
+    version = "0.1.2"
     license = "MIT"
     author = "321640253@qq.com"
     url = "https://github.com/WangZhongDian/logging.git"
