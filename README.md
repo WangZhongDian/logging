@@ -103,5 +103,5 @@ int main() {
 
 # build
 ```shell
-conan install . --build=missing
+conan create . --build=missing
 ```
