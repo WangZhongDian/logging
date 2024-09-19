@@ -99,3 +99,9 @@ int main() {
 ```
 ![](docs/img/![](2024-08-13-22-20-18.png).png)
 ![](docs/img/2024-08-13-22-21-37.png)
+
+
+# build
+```shell
+conan create . --build=missing
+```
