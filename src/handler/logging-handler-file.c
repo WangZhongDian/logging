@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 /**
- * @description ：文件日志处理器释放组件
+ * @brief 文件日志处理器释放组件
  * @param
  * @return
  */
@@ -17,7 +17,7 @@ static void __freeFileHandler(log_Handler *handler) {
 }
 
 /**
- * @description :文件日志处理器输出组件
+ * @brief 文件日志处理器输出组件
  * @param
  * @return
  */
@@ -26,13 +26,14 @@ static void outputFileHandler(log_Handler *handler, const char *message) {
 }
 
 /**
- * @description ：文件日志处理器
+ * @brief 文件日志处理器
  * @param
  * @return
  */
 log_Handler *fileHandler(const char *name) {
     char new_file_name[100];
     sprintf(new_file_name, "%s.log", name);
+
     FILE *fp             = fopen(new_file_name, "at");
 
     log_Handler *handler = (log_Handler *)malloc(sizeof(log_Handler));

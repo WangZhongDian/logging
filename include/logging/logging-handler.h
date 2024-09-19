@@ -12,6 +12,6 @@ typedef struct log_Handler {
 
 
 log_Handler* fileHandler(const char* name);     
-log_Handler* consoleHandler(const char* name);
+log_Handler* consoleHandler();
 
 #endif  //__LOGGING_HANDLER_H__

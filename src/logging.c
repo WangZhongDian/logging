@@ -4,6 +4,7 @@
  ********************************************/
 
 #include "logging.h"
+#include "logging/logging-handler.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,10 +50,10 @@ static void addHandler(log_Handler *handler) {
 }
 
 /**
-* @description : 添加日志拦截器
-* @param 
-* @return 
-*/
+ * @description : 添加日志拦截器
+ * @param
+ * @return
+ */
 void addInterceptor(log_Interceptor *Interceptor) {
     if (G_LOGGER == NULL) {
         return;
@@ -169,6 +170,7 @@ static Logger *getLogger(const char *name, log_level level) {
     if (G_LOGGER != NULL) {
         return G_LOGGER;
     }
+    
     Logger *logger         = (Logger *)malloc(sizeof(Logger));
     logger->fatal          = fatal;
     logger->error          = error;
@@ -180,7 +182,7 @@ static Logger *getLogger(const char *name, log_level level) {
     logger->addInterceptor = addInterceptor;
 
     logger->level          = level;
-    logger->handler        = NULL;
+    logger->handler        = consoleHandler(name);
     logger->name           = name;
     logger->interceptor    = NULL;
 
