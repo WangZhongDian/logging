@@ -18,11 +18,8 @@ logging是一个轻量级的简单易用C语言日志库，支持日志级别、
 #include "logging.h"
 
 int main() {
-    Logging *log = createLogging(); // 创建日志对象
-
-    Logger *logger = log->getLogger("testLogger",LOG_DEBUG); //获取日志控制器
-
-    logger->addHandler(consoleHandler("test")); //为日志对象添加控制台处理器
+    Logging *log    = newLogging();
+    Logger  *logger = log->getLogger("testLogger", LOG_DEBUG);
 
     logger->info("This is an info message");
     logger->error("你好,这是一个错误消息%s", "123");
@@ -30,7 +27,7 @@ int main() {
     logger->debug("This is a debug message");
     logger->warning("This is a warning message%s", "123");
 
-    destroyLogging(log);
+    log->destroyLogging(log);
     return 0;
 }
 ```
@@ -40,11 +37,10 @@ int main() {
 #include "logging.h"
 
 int main() {
-    // Your code goes here
-    Logging *log = createLogging();
+    Logging *log = newLogging();
     Logger *logger = log->getLogger("testLogger",LOG_DEBUG);
     
-    logger->addHandler(consoleHandler("test"));   //为日志对象添加文件处理器
+    logger->addHandler(loggingFileHandler("test"));   //为日志对象添加文件处理器
 
     logger->info("This is an info message");
     logger->error("你好,这是一个错误消息%s", "123");
@@ -52,7 +48,7 @@ int main() {
     logger->debug("This is a debug message");
     logger->warning("This is a warning message%s", "123");
 
-    destroyLogging(log);
+    log->destroyLogging(log);
     return 0;
 }
 ```
@@ -67,12 +63,11 @@ int main() {
 将拦截到的日志重定向到专属文件处理器中
 ```c
 #include "logging.h"
-
+#include <stdio.h>
 
 int main() {
-    Logging *log = createLogging();
-    Logger *logger = log->getLogger("testLogger",LOG_DEBUG);
-    logger->addHandler(consoleHandler("test"));
+    Logging *log    = newLogging();
+    Logger  *logger = log->getLogger("testLogger", LOG_DEBUG);
 
     logger->info("This is an info message");
     logger->error("你好,这是一个错误消息%s", "123");
@@ -80,25 +75,29 @@ int main() {
     logger->debug("This is a debug message");
     logger->warning("This is a warning message%s", "123");
 
-    char *test1[] = {"123", "你好"};//要拦截的字符串
-    //添加拦截器，将拦截到的日志重定向到拦截器的专属处理器中
-    log_Interceptor * tint = substringInterceptor(test1,2,LOG_DEBUG,fileHandler("被拦截")); 
+    char *test1[] = {"123", "你好"}; // 要拦截的字符串
+    // 添加拦截器，将拦截到的日志重定向到拦截器的专属处理器中
+    log_Interceptor *tint =
+        loggingSubStringInterceptor(test1, 2, LOG_DEBUG, loggingFileHandler("被拦截"));
+
     logger->addInterceptor(tint);
+
+    printf("\n");
     printf("Interceptor added\n");
+    printf("\n");
 
     logger->info("This is an info message");
     logger->error("你好,这是一个错误消息%s", "123");
     logger->fatal("This is an fatal message");
-
     logger->debug("This is a debug message");
     logger->warning("This is a warning message%s", "123");
 
-    destroyLogging(log);
+    log->destroyLogging(log);
     return 0;
 }
 ```
-![](docs/img/![](2024-08-13-22-20-18.png).png)
-![](docs/img/2024-08-13-22-21-37.png)
+![](docs/img/2024-09-21-11-44-25.png)
+![](docs/img/2024-09-21-11-44-06.png)
 
 
 # build

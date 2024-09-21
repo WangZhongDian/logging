@@ -23,9 +23,8 @@ static void outputConsoleHandler(log_Handler *handler, const char *message) {
 
 /**
  * @brief ：控制台日志处理器
- * @param
  */
-log_Handler *consoleHandler() {
+log_Handler *loggingConsoleHandler() {
     log_Handler *handler = (log_Handler *)malloc(sizeof(log_Handler));
 
     handler->stream      = stdout;

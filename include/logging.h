@@ -28,10 +28,10 @@ typedef struct Logger {
 typedef struct Logging {
     Logger *(*getLogger)(const char *name, log_level level);
     log_status (*setLevel)(Logger *logger, log_level level);
+    Logger *(*getCurrentLogger)(void);
+    log_status (*destroyLogging)(struct Logging *logging);
 } Logging;
 
-Logging   *createLogging();                  // 创建日志类对象
-log_status destroyLogging(Logging *logging); // 销毁日志类对象
-Logger    *getCurrentLogger(void);           // 获取当前日志记录器
+Logging *newLogging(); // 创建日志类对象
 
 #endif // __LOGGING_H__

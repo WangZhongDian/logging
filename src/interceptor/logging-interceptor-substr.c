@@ -1,6 +1,6 @@
 /********************************************
  * @Date: 2024 08 12
- * @Description: 日志拦截器
+ * @Description: 子串拦截器
  *********************************************/
 
 #include "logging/logging-interceptor.h"
@@ -98,10 +98,10 @@ static void _freeSubstring(log_Interceptor *interceptor) {
 /**
  * @description : 子字符串拦截器
  */
-log_Interceptor *substringInterceptor(char        *keywords[],
-                                      int          count,
-                                      log_level    level,
-                                      log_Handler *handler) {
+log_Interceptor *loggingSubStringInterceptor(char        *keywords[],
+                                             int          count,
+                                             log_level    level,
+                                             log_Handler *handler) {
     log_Interceptor *interceptor =
         (log_Interceptor *)malloc(sizeof(log_Interceptor));
     interceptor->_dispose = _disposeSubstring;

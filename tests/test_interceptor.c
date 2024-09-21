@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 int main() {
-    Logging *log    = createLogging();
+    Logging *log    = newLogging();
     Logger  *logger = log->getLogger("testLogger", LOG_DEBUG);
 
     logger->info("This is an info message");
@@ -14,9 +14,13 @@ int main() {
     char *test1[] = {"123", "你好"}; // 要拦截的字符串
     // 添加拦截器，将拦截到的日志重定向到拦截器的专属处理器中
     log_Interceptor *tint =
-        substringInterceptor(test1, 2, LOG_DEBUG, fileHandler("被拦截"));
+        loggingSubStringInterceptor(test1, 2, LOG_DEBUG, loggingFileHandler("被拦截"));
+
     logger->addInterceptor(tint);
+
+    printf("\n");
     printf("Interceptor added\n");
+    printf("\n");
 
     logger->info("This is an info message");
     logger->error("你好,这是一个错误消息%s", "123");
@@ -24,6 +28,6 @@ int main() {
     logger->debug("This is a debug message");
     logger->warning("This is a warning message%s", "123");
 
-    destroyLogging(log);
+    log->destroyLogging(log);
     return 0;
 }
