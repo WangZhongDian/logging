@@ -2,7 +2,6 @@
  * @Date: 2024 08 12
  * @Description: 日志模块
  ********************************************/
-
 #include "logging.h"
 #include "logging/logging-handler.h"
 #include <stdio.h>
@@ -10,9 +9,8 @@
 #include <string.h>
 #include <time.h>
 
-Logger *G_LOGGER = NULL;
-
 #define RED     "\033[0;31m"
+#define RED_B   "\033[0;41m"
 #define GREEN   "\033[0;32m"
 #define YELLOW  "\033[0;33m"
 #define BLUE    "\033[0;34m"
@@ -23,6 +21,8 @@ Logger *G_LOGGER = NULL;
 #define BLACK   "\033[0;30m"
 
 #define LOG_BUFFER_SIZE 1024
+
+Logger *G_LOGGER = NULL;
 
 static void getTimeStr(char *timeStr) {
     time_t     t = time(NULL);
@@ -96,10 +96,17 @@ _builtin_log(char *level, const char *color, const char *message, ...) {
 
     // 判断处理器是否应用颜色
     if (handler->apply_color)
-        sprintf(
-            logStr, "%s %s%s%s %s\n", timeStr, color, level, RESET, message);
+        sprintf(logStr,
+                "%s: %s %s%s%s %s\n",
+                G_LOGGER->name,
+                timeStr,
+                color,
+                level,
+                RESET,
+                message);
     else
-        sprintf(logStr, "%s %s %s\n", timeStr, level, message);
+        sprintf(
+            logStr, "%s: %s %s %s\n", G_LOGGER->name, timeStr, level, message);
 
     handler->output(handler, logStr);
 }
@@ -112,7 +119,7 @@ static void fatal(const char *message, ...) {
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_log("Fatal", RED, logStr, args);
+        _builtin_log("Fatal", RED_B, logStr, args);
     }
 }
 
@@ -168,10 +175,13 @@ static void debug(const char *message, ...) {
  */
 static Logger *getLogger(const char *name, log_level level) {
     if (G_LOGGER != NULL) {
+        G_LOGGER->name  = name;
+        G_LOGGER->level = level;
         return G_LOGGER;
     }
-    
+
     Logger *logger         = (Logger *)malloc(sizeof(Logger));
+    // 方法
     logger->fatal          = fatal;
     logger->error          = error;
     logger->warning        = warning;
@@ -181,23 +191,14 @@ static Logger *getLogger(const char *name, log_level level) {
     logger->addHandler     = addHandler;
     logger->addInterceptor = addInterceptor;
 
+    // 属性
     logger->level          = level;
-    logger->handler        = consoleHandler(name);
+    logger->handler        = loggingConsoleHandler();
     logger->name           = name;
     logger->interceptor    = NULL;
 
     G_LOGGER               = logger;
     return G_LOGGER;
-}
-
-/**
- * @description :创建一个日志对象
- * @return :Logging* 返回一个日志对象
- */
-Logging *createLogging() {
-    Logging *logging   = (Logging *)malloc(sizeof(Logging));
-    logging->getLogger = getLogger;
-    return logging;
 }
 
 /**
@@ -232,4 +233,16 @@ Logger *getCurrentLogger(void) {
         return NULL;
     }
     return G_LOGGER;
+}
+
+/**
+ * @description :创建一个日志对象
+ * @return :Logging* 返回一个日志对象
+ */
+Logging *newLogging() {
+    Logging *logging          = (Logging *)malloc(sizeof(Logging));
+    logging->getLogger        = getLogger;
+    logging->destroyLogging   = destroyLogging;
+    logging->getCurrentLogger = getCurrentLogger;
+    return logging;
 }

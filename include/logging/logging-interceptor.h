@@ -12,9 +12,9 @@ typedef struct log_Interceptor {
 
 } log_Interceptor;
 
-log_Interceptor *substringInterceptor(char        *keywords[],
-                                      int          count,
-                                      log_level    level,
-                                      log_Handler *handler);
+log_Interceptor *loggingSubStringInterceptor(char        *keywords[],
+                                             int          count,
+                                             log_level    level,
+                                             log_Handler *handler);
 
 #endif // __LOGGING_INTERCEPTOR_H__

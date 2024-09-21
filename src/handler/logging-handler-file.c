@@ -8,8 +8,6 @@
 
 /**
  * @brief 文件日志处理器释放组件
- * @param
- * @return
  */
 static void __freeFileHandler(log_Handler *handler) {
     fclose(handler->stream);
@@ -18,8 +16,8 @@ static void __freeFileHandler(log_Handler *handler) {
 
 /**
  * @brief 文件日志处理器输出组件
- * @param
- * @return
+ * @param handler 文件日志处理器
+ * @param message 消息
  */
 static void outputFileHandler(log_Handler *handler, const char *message) {
     fputs(message, handler->stream);
@@ -27,10 +25,10 @@ static void outputFileHandler(log_Handler *handler, const char *message) {
 
 /**
  * @brief 文件日志处理器
- * @param
- * @return
+ * @param   name 文件名
+ * @return  log_Handler *
  */
-log_Handler *fileHandler(const char *name) {
+log_Handler *loggingFileHandler(const char *name) {
     char new_file_name[100];
     sprintf(new_file_name, "%s.log", name);
 
