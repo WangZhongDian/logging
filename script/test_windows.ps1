@@ -1,5 +1,5 @@
 cmake build -B build . 
 Set-Location -Path "./build"
-make 
+cmake --build .
 ctest
 Set-Location -Path ".."
