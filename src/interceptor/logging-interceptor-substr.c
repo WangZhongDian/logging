@@ -31,7 +31,7 @@ static bool kmp_search(char *substr, char *master) {
     int  j         = 0;
     int  substrlen = strlen(substr);
     int  masterlen = strlen(master);
-    int *next      = (int *)malloc(sizeof(int) * substrlen + 1);
+    int *next      = (int *)malloc(sizeof(int) * (substrlen + 1));
     get_next(substr, next);
 
     while (i < masterlen && j < substrlen) {
@@ -80,19 +80,22 @@ static bool _disposeSubstring(char *level, const char *message, ...) {
  * @description : 完成拦截器自我释放内存
  */
 static void _freeSubstring(log_Interceptor *interceptor) {
-    int sum = 0;
-    while (G_keywords[sum] != NULL) {
+    if (G_keywords!=NULL) {
+        int sum = 0;
+        while (G_keywords[sum] != NULL) {
+            free(G_keywords[sum]);
+            sum++;
+        }
         free(G_keywords[sum]);
-        sum++;
+        free(G_keywords);
+        G_keywords = NULL;
     }
-    free(G_keywords);
-    G_keywords = NULL;
 
     if (interceptor->handler != NULL) {
         interceptor->handler->_free(interceptor->handler);
     }
-
-    free(interceptor);
+    
+    if(interceptor!=NULL)free(interceptor);
 }
 
 /**
