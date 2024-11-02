@@ -8,7 +8,7 @@
 #include "logging/logging-handler.h"
 #include "logging/logging-interceptor.h"
 
-// 日志操作器
+
 typedef struct Logger {
     log_level        level;
     log_Handler     *handler;
@@ -24,7 +24,7 @@ typedef struct Logger {
     void (*addInterceptor)(log_Interceptor *Interceptor);
 } Logger;
 
-// 日志类对象
+
 typedef struct Logging {
     Logger *(*getLogger)(const char *name, log_level level);
     log_status (*setLevel)(Logger *logger, log_level level);
@@ -32,6 +32,6 @@ typedef struct Logging {
     log_status (*destroyLogging)(struct Logging *logging);
 } Logging;
 
-Logging *newLogging(); // 创建日志类对象
+Logging *newLogging();
 
 #endif // __LOGGING_H__

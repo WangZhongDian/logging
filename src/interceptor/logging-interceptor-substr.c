@@ -1,8 +1,3 @@
-/********************************************
- * @Date: 2024 08 12
- * @Description: 子串拦截器
- *********************************************/
-
 #include "logging/logging-interceptor.h"
 #include <stdbool.h>
 #include <stdio.h>
@@ -31,7 +26,7 @@ static bool kmp_search(char *substr, char *master) {
     int  j         = 0;
     int  substrlen = strlen(substr);
     int  masterlen = strlen(master);
-    int *next      = (int *)malloc(sizeof(int) * substrlen + 1);
+    int *next      = (int *)malloc(sizeof(int) * (substrlen + 1));
     get_next(substr, next);
 
     while (i < masterlen && j < substrlen) {
@@ -54,11 +49,6 @@ static bool kmp_search(char *substr, char *master) {
         return false;
 }
 
-/**
- * @description 处理
- * @param
- * @return
- */
 static bool _disposeSubstring(char *level, const char *message, ...) {
     int count = 0;
 
@@ -76,28 +66,26 @@ static bool _disposeSubstring(char *level, const char *message, ...) {
     return false;
 }
 
-/**
- * @description : 完成拦截器自我释放内存
- */
 static void _freeSubstring(log_Interceptor *interceptor) {
-    int sum = 0;
-    while (G_keywords[sum] != NULL) {
+    if (G_keywords != NULL) {
+        int sum = 0;
+        while (G_keywords[sum] != NULL) {
+            free(G_keywords[sum]);
+            sum++;
+        }
         free(G_keywords[sum]);
-        sum++;
+        free(G_keywords);
+        G_keywords = NULL;
     }
-    free(G_keywords);
-    G_keywords = NULL;
 
     if (interceptor->handler != NULL) {
         interceptor->handler->_free(interceptor->handler);
     }
 
-    free(interceptor);
+    if (interceptor != NULL)
+        free(interceptor);
 }
 
-/**
- * @description : 子字符串拦截器
- */
 log_Interceptor *loggingSubStringInterceptor(char        *keywords[],
                                              int          count,
                                              log_level    level,
@@ -109,7 +97,7 @@ log_Interceptor *loggingSubStringInterceptor(char        *keywords[],
     interceptor->level    = level;
     interceptor->_free    = _freeSubstring;
 
-    G_keywords            = (char **)malloc((sizeof(G_keywords) * count) + 1);
+    G_keywords            = (char **)malloc((sizeof(G_keywords) * (count + 1)));
 
     for (int i = 0; i < count; i++) {
         G_keywords[i] = (char *)malloc(strlen(keywords[i]) + 1);

@@ -4,14 +4,13 @@
 #include <stdbool.h>
 
 typedef struct log_Handler {
-    void* stream;
-    bool apply_color;
-    void (*_free)(struct log_Handler* handler);//释放资源
-    void (*output)(struct log_Handler* handler,const char* message);
+    void *stream;
+    bool  apply_color;
+    void (*_free)(struct log_Handler *handler);
+    void (*output)(struct log_Handler *handler, const char *message);
 } log_Handler;
 
+log_Handler *loggingFileHandler(const char *name);
+log_Handler *loggingConsoleHandler();
 
-log_Handler* loggingFileHandler(const char* name);     
-log_Handler* loggingConsoleHandler();
-
-#endif  //__LOGGING_HANDLER_H__
+#endif //__LOGGING_HANDLER_H__

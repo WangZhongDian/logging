@@ -1,14 +1,9 @@
-/********************************************
- * @Date: 2024 08 12
- * @Description: 日志模块
- ********************************************/
 #include "logging.h"
 #include "logging/logging-handler.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
 
 #define RED    "\033[0;31m"
 #define RED_B  "\033[0;41m"
@@ -17,7 +12,6 @@
 #define BLUE   "\033[0;34m"
 #define RESET  "\033[0m"
 #define CYAN   "\033[0;36m"
-
 
 #define LOG_BUFFER_SIZE 1024
 
@@ -31,9 +25,6 @@ static void getTimeStr(char *timeStr) {
     strcpy(timeStr, _timeStr);
 }
 
-/**
- * @description : 添加日志处理器
- */
 static void addHandler(log_Handler *handler) {
     if (G_LOGGER == NULL) {
         return;
@@ -48,11 +39,6 @@ static void addHandler(log_Handler *handler) {
     G_LOGGER->handler = handler;
 }
 
-/**
- * @description : 添加日志拦截器
- * @param
- * @return
- */
 void addInterceptor(log_Interceptor *Interceptor) {
     if (G_LOGGER == NULL) {
         return;
@@ -67,9 +53,6 @@ void addInterceptor(log_Interceptor *Interceptor) {
     G_LOGGER->interceptor = Interceptor;
 }
 
-/**
- * @description : 内置日志记录函数
- */
 static void
 _builtin_log(char *level, const char *color, const char *message, ...) {
     if (G_LOGGER == NULL) {
@@ -84,7 +67,6 @@ _builtin_log(char *level, const char *color, const char *message, ...) {
 
     log_Handler *handler = G_LOGGER->handler;
 
-    // 通过拦截器
     if (G_LOGGER->interceptor != NULL) {
         if (G_LOGGER->interceptor->_dispose(level, message)) {
             if (G_LOGGER->interceptor->handler != NULL) {
@@ -93,7 +75,6 @@ _builtin_log(char *level, const char *color, const char *message, ...) {
         }
     }
 
-    // 判断处理器是否应用颜色
     if (handler->apply_color)
         sprintf(logStr,
                 "%s: %s %s%s%s %s\n",
@@ -110,7 +91,6 @@ _builtin_log(char *level, const char *color, const char *message, ...) {
     handler->output(handler, logStr);
 }
 
-//*************************记录日志******************************* */
 static void fatal(const char *message, ...) {
     if (G_LOGGER->level >= LOG_ERROR) {
         char    logStr[LOG_BUFFER_SIZE];
@@ -165,13 +145,7 @@ static void debug(const char *message, ...) {
         _builtin_log("Debug", CYAN, logStr, args);
     }
 }
-//*************************记录日志******************************* */
 
-/**
- * @description :获取一个日志操作对象
- * @param
- * @return
- */
 static Logger *getLogger(const char *name, log_level level) {
     if (G_LOGGER != NULL) {
         G_LOGGER->name  = name;
@@ -180,7 +154,7 @@ static Logger *getLogger(const char *name, log_level level) {
     }
 
     Logger *logger         = (Logger *)malloc(sizeof(Logger));
-    // 方法
+
     logger->fatal          = fatal;
     logger->error          = error;
     logger->warning        = warning;
@@ -190,7 +164,6 @@ static Logger *getLogger(const char *name, log_level level) {
     logger->addHandler     = addHandler;
     logger->addInterceptor = addInterceptor;
 
-    // 属性
     logger->level          = level;
     logger->handler        = loggingConsoleHandler();
     logger->name           = name;
@@ -223,10 +196,6 @@ log_status destroyLogging(Logging *logging) {
     return L_OK;
 }
 
-/**
- * @description :获取当前日志操作对象
- * @return 当前唯一的日志操作对象
- */
 Logger *getCurrentLogger(void) {
     if (G_LOGGER == NULL) {
         return NULL;
@@ -234,10 +203,6 @@ Logger *getCurrentLogger(void) {
     return G_LOGGER;
 }
 
-/**
- * @description :创建一个日志对象
- * @return :Logging* 返回一个日志对象
- */
 Logging *newLogging() {
     Logging *logging          = (Logging *)malloc(sizeof(Logging));
     logging->getLogger        = getLogger;
