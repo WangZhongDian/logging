@@ -3,9 +3,9 @@ name: test on Linux
 
 on:
     push:
-        branches: ["mian"]
+        branches: ["main"]
     pull_request: 
-        branches: ["mian"]
+        branches: ["main"]
 
 jobs:
     test:
