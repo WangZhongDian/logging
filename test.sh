@@ -1,1 +1,2 @@
-mkdir -p build && cd build && cmake .. && make && ctest
+#!/bin/bash
+cmake build -B build . && cd build && make && ctest
