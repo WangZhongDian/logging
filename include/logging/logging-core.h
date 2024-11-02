@@ -14,5 +14,4 @@ typedef enum {
     L_OK,
 } log_status;
 
-
 #endif // __LOGGING_CORE_H__

@@ -5,10 +5,10 @@
 #include "logging-handler.h"
 
 typedef struct log_Interceptor {
-    log_level    level;   // 拦截级别
-    log_Handler *handler; // 拦截目标处理器
-    bool (*_dispose)(char *level, const char *message, ...); // 拦截触发器
-    void (*_free)(struct log_Interceptor *Interceptor);      // 释放资源
+    log_level    level;
+    log_Handler *handler;
+    bool (*_dispose)(char *level, const char *message, ...);
+    void (*_free)(struct log_Interceptor *Interceptor);
 
 } log_Interceptor;
 
