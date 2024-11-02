@@ -1,0 +1,17 @@
+
+name: test on Linux
+
+on:
+    push:
+        branches: ["mian"]
+    pull_request: 
+        branches: ["mian"]
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout code
+              uses: actions/checkout@v4
+            - name: test
+              run: bash ./test.sh

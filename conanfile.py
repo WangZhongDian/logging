@@ -1,10 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import copy, get
-from conan.tools.build import check_min_cppstd
-from conan import tools
+from conan.tools.files import copy
 import os
-
 
 class loggingRecipe(ConanFile):
     name = "logging"
@@ -16,11 +13,11 @@ class loggingRecipe(ConanFile):
     topics = ("logging", "C", "simple", "easy-to-use", "log","Logging")
 
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False],"test":[True,False]}
+    default_options = {"shared": False, "fPIC": True,"test":True}
 
 
-    exports_sources = "include/*", "CMakeLists.txt", "src/*"
+    exports_sources = "include/*", "CMakeLists.txt", "src/*", "tests/*"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -30,8 +27,6 @@ class loggingRecipe(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-
-    
     def layout(self):
         cmake_layout(self)
 
@@ -39,18 +34,16 @@ class loggingRecipe(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
-        tc.variables["SKIPTEST"]=True
-        if self.options.shared:
-            tc.variables["SHARED"] = True
-        else:
-            tc.variables["SHARED"] = False
+        tc.variables["TEST"] = True if self.options.test else False
+        tc.variables["SHARED"] = True if self.options.shared else False
         tc.generate()
 
     def build(self):
         cmake = CMake(self)
         cmake.configure()
-        cmake.build(target="Logging")
-
+        cmake.build()
+        if self.options.test:
+            cmake.test()
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -62,4 +55,4 @@ class loggingRecipe(ConanFile):
         copy(self, pattern="*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["Logging"]
+        self.cpp_info.libs = ["logging"]
