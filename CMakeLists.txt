@@ -1,12 +1,11 @@
-cmake_minimum_required( VERSION 3.28)
+cmake_minimum_required(VERSION 3.28...3.30)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS yes)
+
 project(logging)
 
 option(TEST "是否启动单元测试" ON)
 option(SHARED "是否编译为动态库" OFF)
-
-set(LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
-set(ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
