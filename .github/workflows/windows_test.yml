@@ -1,4 +1,4 @@
-name: test on Linux
+name: test on Windows
 
 on:
     push:
@@ -8,9 +8,9 @@ on:
 
 jobs:
     test:
-        runs-on: ubuntu-latest
+        runs-on: windows-latest
         steps:
             - name: checkout code
               uses: actions/checkout@v4
             - name: test
-              run: bash ./script/test.sh
+              run: ./script/test_windows.ps1
