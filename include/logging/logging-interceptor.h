@@ -12,6 +12,12 @@ typedef struct log_Interceptor {
 
 } log_Interceptor;
 
+
+/**
+* @brief  子字符串拦截器
+* @param 
+* @return 
+*/
 log_Interceptor *loggingSubStringInterceptor(char        *keywords[],
                                              int          count,
                                              log_level    level,
