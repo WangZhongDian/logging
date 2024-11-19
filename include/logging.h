@@ -8,6 +8,9 @@
 #include "logging/logging-handler.h"
 #include "logging/logging-interceptor.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct Logger {
     log_level        level;
@@ -33,5 +36,9 @@ typedef struct Logging {
 } Logging;
 
 Logging *newLogging();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // __LOGGING_H__
