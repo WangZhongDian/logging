@@ -1,5 +1,7 @@
 #include "logging.h"
 #include "logging/logging-handler.h"
+#include "utils/logging-utils.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,42 +19,46 @@
 
 Logger *G_LOGGER = NULL;
 
-static void getTimeStr(char *timeStr) {
-    time_t     t = time(NULL);
-    struct tm *p = localtime(&t);
-    char       _timeStr[20];
-    strftime(_timeStr, sizeof(_timeStr), "%Y-%m-%d %H:%M:%S", p);
-    strcpy(timeStr, _timeStr);
-}
-
-static void addHandler(log_Handler *handler) {
-    if (G_LOGGER == NULL) {
-        return;
+/**
+ * @brief 为日志添加一个handler
+ * @param handler 处理器对象
+ */
+static bool addHandler(log_Handler *handler) {
+    if (G_LOGGER == NULL || handler == NULL) {
+        return false;
     }
     if (G_LOGGER->handler == NULL) {
         G_LOGGER->handler = handler;
-        return;
+        return true;
     }
 
     G_LOGGER->handler->_free(G_LOGGER->handler);
-
     G_LOGGER->handler = handler;
+    return true;
 }
 
-void addInterceptor(log_Interceptor *Interceptor) {
-    if (G_LOGGER == NULL) {
-        return;
+static bool addInterceptor(log_Interceptor *Interceptor) {
+    if (G_LOGGER == NULL || Interceptor == NULL) {
+        return false;
     }
     if (G_LOGGER->interceptor == NULL) {
         G_LOGGER->interceptor = Interceptor;
-        return;
+        return true;
     }
 
     G_LOGGER->interceptor->_free(G_LOGGER->interceptor);
-
     G_LOGGER->interceptor = Interceptor;
+    return true;
 }
 
+/**
+ * @brief 内部日志打印处理核心函数
+ * @param level 日志等级
+ * @param color 应用的颜色
+ * @param message 日志内容
+ * @param ... 格式化参数列表
+ * @return
+ */
 static void
 _builtin_log(char *level, const char *color, const char *message, ...) {
     if (G_LOGGER == NULL) {
@@ -77,7 +83,7 @@ _builtin_log(char *level, const char *color, const char *message, ...) {
 
     if (handler->apply_color)
         sprintf(logStr,
-                "%s: %s %s%s%s %s\n",
+                "[%s]: %s %s%s%s %s\n",
                 G_LOGGER->name,
                 timeStr,
                 color,
@@ -85,8 +91,12 @@ _builtin_log(char *level, const char *color, const char *message, ...) {
                 RESET,
                 message);
     else
-        sprintf(
-            logStr, "%s: %s %s %s\n", G_LOGGER->name, timeStr, level, message);
+        sprintf(logStr,
+                "[%s]: %s %s %s\n",
+                G_LOGGER->name,
+                timeStr,
+                level,
+                message);
 
     handler->output(handler, logStr);
 }
@@ -146,7 +156,7 @@ static void debug(const char *message, ...) {
     }
 }
 
-static Logger *getLogger(const char *name, log_level level) {
+Logger *newLogger(const char *name, log_level level) {
     if (G_LOGGER != NULL) {
         G_LOGGER->name  = name;
         G_LOGGER->level = level;
@@ -174,12 +184,9 @@ static Logger *getLogger(const char *name, log_level level) {
 }
 
 /**
- * @description :销毁日志对象
+ * @brief 销毁日志对象
  */
-log_status destroyLogging(Logging *logging) {
-    if (logging == NULL) {
-        return L_ERROR;
-    }
+log_status destroyLogger(void) {
     if (G_LOGGER != NULL) {
         if (G_LOGGER->handler != NULL) {
             G_LOGGER->handler->_free(G_LOGGER->handler);
@@ -192,21 +199,12 @@ log_status destroyLogging(Logging *logging) {
         free(G_LOGGER);
         G_LOGGER = NULL;
     }
-    free(logging);
     return L_OK;
 }
 
-Logger *getCurrentLogger(void) {
+Logger *getDefaultLogger(void) {
     if (G_LOGGER == NULL) {
         return NULL;
     }
     return G_LOGGER;
-}
-
-Logging *newLogging() {
-    Logging *logging          = (Logging *)malloc(sizeof(Logging));
-    logging->getLogger        = getLogger;
-    logging->destroyLogging   = destroyLogging;
-    logging->getCurrentLogger = getCurrentLogger;
-    return logging;
 }
