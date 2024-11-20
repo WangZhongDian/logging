@@ -3,8 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define Handler_FILE_EX_PRT(fp)                                                \
-    ((log_Handler_file_ex_t *)(fp + sizeof(log_Handler)))
+// 根据log_Handler结构体指针获取log_Handler_file_ex_t结构体指针
+// log_Handler_file_ex_t与log_Handler处于连续内存中
+#define Handler_file_EX_PRT(handler)                                           \
+    ((log_Handler_file_ex_t *)((void*)handler + sizeof(log_Handler)))
+
+#define FILE_NAME_MAX_SIZE 50
 
 typedef struct log_Handler_file_ex_s {
     unsigned int file_size;
@@ -20,54 +24,73 @@ static unsigned int getFileSize(FILE *fp) {
 
 static void __freeFileHandler(log_Handler *handler) {
     fclose(handler->stream);
-    free(Handler_FILE_EX_PRT(handler)->file_name);
+    free(Handler_file_EX_PRT(handler)->file_name);
     free(handler);
 }
 
 static void changeFile(log_Handler *handler) {
-    log_Handler_file_ex_t *handler_ex = Handler_FILE_EX_PRT(handler);
+    log_Handler_file_ex_t *handler_ex = Handler_file_EX_PRT(handler);
     fclose(handler->stream);
-    char new_file_name[30];
-    sprintf(new_file_name, "%s_%d.log", handler_ex->file_name, ++handler_ex->suffix);
-    handler->stream = fopen(new_file_name, "at");
+    char new_file_name[FILE_NAME_MAX_SIZE];
+    sprintf(new_file_name,
+            "%s_%d.log",
+            handler_ex->file_name,
+            ++handler_ex->suffix);
+    handler->stream       = fopen(new_file_name, "at");
     handler_ex->file_size = getFileSize(handler->stream);
 }
 
 static void outputFileHandler(log_Handler *handler, const char *message) {
     fputs(message, handler->stream);
-    log_Handler_file_ex_t *handler_ex = Handler_FILE_EX_PRT(handler);
+    log_Handler_file_ex_t *handler_ex = Handler_file_EX_PRT(handler);
     handler_ex->file_size += strlen(message);
     if (handler_ex->file_size > handler_ex->file_size_max)
         changeFile(handler);
 }
 
 log_Handler *loggingFileHandler(const char *name, unsigned int max_size) {
-    char         new_file_name[30];
-    int          suffix = 0;
-    unsigned int file_size;
-    FILE        *fp;
+    char                   new_file_name[FILE_NAME_MAX_SIZE];
+    int                    suffix = 0;
+    unsigned int           file_size;
+    FILE                  *fp         = NULL;
+    log_Handler           *handler    = NULL;
+    log_Handler_file_ex_t *handler_ex = NULL;
 
     do {
         sprintf(new_file_name, "%s_%d.log", name, suffix++);
-        fp        = fopen(new_file_name, "at");
+        fp = fopen(new_file_name, "at");
+        if (fp == NULL)
+            goto ERROR;
         file_size = getFileSize(fp);
     } while (file_size > max_size);
 
     /// 分配log_Handler与记录文件大小的空间
-    log_Handler           *handler = (log_Handler *)malloc(sizeof(log_Handler) +
-                                                 sizeof(log_Handler_file_ex_t));
+    handler = (log_Handler *)malloc(sizeof(log_Handler) +
+                                    sizeof(log_Handler_file_ex_t));
+    if (handler == NULL)
+        goto ERROR;
+    
+    handler_ex                = Handler_file_EX_PRT(handler);
+    // printf("%p\n", handler);
+    handler_ex->file_size_max = max_size;
+    handler_ex->file_size     = file_size;
+    handler_ex->suffix        = suffix;
+    handler_ex->file_name     = strdup(name);
+    if (handler_ex->file_name == NULL)
+        goto ERROR;
 
-    log_Handler_file_ex_t *handler_ex = Handler_FILE_EX_PRT(handler);
-    handler_ex->file_size_max        = max_size;
-    handler_ex->file_size             = file_size;
-    handler_ex->suffix                = suffix;
-    handler_ex->file_name             = malloc(strlen(new_file_name) + 1);
-    strcpy(handler_ex->file_name, name);
-
-    handler->stream                   = fp;
-    handler->apply_color              = false;
-    handler->_free                    = __freeFileHandler;
-    handler->output                   = outputFileHandler;
-
+    handler->stream      = fp;
+    handler->apply_color = false;
+    handler->_free       = __freeFileHandler;
+    handler->output      = outputFileHandler;
     return handler;
+
+ERROR:
+    if (fp)
+        fclose(fp);
+    if (handler) {
+        free(Handler_file_EX_PRT(handler)->file_name); // 直接释放，无需检查NULL
+        free(handler);
+    }
+    return NULL;
 }

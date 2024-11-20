@@ -11,6 +11,15 @@ logging是一个轻量级的简单易用C语言日志库，支持日志级别、
 - 支持日志输出：控制台、文件
 - 支持日志文件：自动创建、自动滚动、自动删除(未完成)
 
+## 安装
+- conan安装使用
+```shell
+conan create . --build=missing
+```
+- cmake安装使用
+```shell
+```
+
 ## 使用方法
 
 ### 控制台日志
@@ -18,16 +27,15 @@ logging是一个轻量级的简单易用C语言日志库，支持日志级别、
 #include "logging.h"
 
 int main() {
-    Logging *log    = newLogging();
-    Logger  *logger = log->getLogger("testLogger", LOG_DEBUG);
+    Logger *logger = newLogger("testLogger", LOG_DEBUG);
 
     logger->info("This is an info message");
-    logger->error("你好,这是一个错误消息%s", "123");
+    logger->error("This is an error message%s", "123");
     logger->fatal("This is an fatal message");
     logger->debug("This is a debug message");
     logger->warning("This is a warning message%s", "123");
 
-    log->destroyLogging(log);
+    destroyLogger();
     return 0;
 }
 ```
@@ -35,20 +43,19 @@ int main() {
 ### 文件日志
 ```c
 #include "logging.h"
+#include "logging/logging-handler.h"
 
 int main() {
-    Logging *log = newLogging();
-    Logger *logger = log->getLogger("testLogger",LOG_DEBUG);
-    
-    logger->addHandler(loggingFileHandler("test"));   //为日志对象添加文件处理器
+    Logger *logger = newLogger("testLogger", LOG_DEBUG);
+    logger->addHandler(loggingFileHandler("test1", 1024*1024));
 
     logger->info("This is an info message");
-    logger->error("你好,这是一个错误消息%s", "123");
+    logger->error("This is an error message%s", "123");
     logger->fatal("This is an fatal message");
     logger->debug("This is a debug message");
     logger->warning("This is a warning message%s", "123");
 
-    log->destroyLogging(log);
+    destroyLogger();
     return 0;
 }
 ```
@@ -66,8 +73,7 @@ int main() {
 #include <stdio.h>
 
 int main() {
-    Logging *log    = newLogging();
-    Logger  *logger = log->getLogger("testLogger", LOG_DEBUG);
+    Logger  *logger = newLogger("testLogger", LOG_DEBUG);
 
     logger->info("This is an info message");
     logger->error("This is an error message%s", "123");
@@ -95,15 +101,10 @@ int main() {
     logger->debug("This is a debug message");
     logger->warning("This is a warning message%s", "123");
 
-    log->destroyLogging(log);
+    destroyLogger();
     return 0;
 }
 ```
 ![](docs/img/2024-09-21-11-44-25.png)
 ![](docs/img/2024-09-21-11-44-06.png)
 
-
-# build
-```shell
-conan create . --build=missing
-```
