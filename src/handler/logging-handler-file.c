@@ -3,10 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-// 根据log_Handler结构体指针获取log_Handler_file_ex_t结构体指针
+// 根据log_Handler结构体指针起始获取log_Handler_file_ex_t结构体指针
 // log_Handler_file_ex_t与log_Handler处于连续内存中
+// 使用char*指针进行偏移，达到以偏移1个字节为单位的偏移
 #define Handler_file_EX_PRT(handler)                                           \
-    ((log_Handler_file_ex_t *)((void*)handler + sizeof(log_Handler)))
+    ((log_Handler_file_ex_t *)((char *)handler + sizeof(log_Handler)))
 
 #define FILE_NAME_MAX_SIZE 50
 
@@ -69,9 +70,8 @@ log_Handler *loggingFileHandler(const char *name, unsigned int max_size) {
                                     sizeof(log_Handler_file_ex_t));
     if (handler == NULL)
         goto ERROR;
-    
+
     handler_ex                = Handler_file_EX_PRT(handler);
-    // printf("%p\n", handler);
     handler_ex->file_size_max = max_size;
     handler_ex->file_size     = file_size;
     handler_ex->suffix        = suffix;
