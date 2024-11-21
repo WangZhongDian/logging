@@ -23,6 +23,8 @@ conan create .
 ```
 
 ## 使用方法
+![](docs/img/2024-09-21-11-44-25.png)
+![](docs/img/2024-09-21-11-44-06.png)
 
 ### 控制台日志
 ```c
@@ -68,7 +70,7 @@ int main() {
 > 拦截器的作用:可以将拦截到的日志重定向到拦截器的专属处理器中
 
 
-#### 例子
+#### 单个子串拦截器
 将拦截到的日志重定向到专属文件处理器中
 ```c
 #include "logging.h"
@@ -83,13 +85,13 @@ int main() {
     log_debug("This is a debug message");
     log_warning("This is a warning message%s", "123");
 
-    char *test1[]         = {"123", "tt"};
+    char *test1[]         = {"123", "tt", NULL};
 
     log_Interceptor *tint = loggingSubStringInterceptor(
         test1,
-        2,
         LOG_DEBUG,
-        loggingFileHandler("test_interceptor", 1024 * 1024));
+        loggingFileHandler("test_interceptor", 1024 * 1024),
+        true);
 
     logger->addInterceptor(tint);
 
@@ -107,6 +109,55 @@ int main() {
     return 0;
 }
 ```
-![](docs/img/2024-09-21-11-44-25.png)
-![](docs/img/2024-09-21-11-44-06.png)
+
+#### 多个子串拦截器
+```c
+#include "logging.h"
+#include <stdbool.h>
+#include <stdio.h>
+#include <time.h>
+
+int main() {
+    Logger *logger = newDefaultLogger("testLogger", LOG_DEBUG);
+
+    log_info("This is an info message");
+    log_error("This is an error message%s", "123");
+    log_fatal("This is an fatal message");
+    log_debug("This is a debug message");
+    log_warning("This is a warning message%s", "123");
+
+    char *test1[]         = {"This",NULL};
+
+    log_Interceptor *tint = loggingSubStringInterceptor(
+        test1,
+        LOG_DEBUG,
+        loggingFileHandler("test_interceptor", 1024 * 1024),
+        false);
+
+    logger->addInterceptor(tint);
+
+    char *test2[]         = {"123",NULL};
+
+    log_Interceptor *tint1 = loggingSubStringInterceptor(
+        test2,
+        LOG_DEBUG,
+        loggingFileHandler("test_interceptor1", 1024 * 1024),
+        true);
+
+    logger->addInterceptor(tint1);
+
+    printf("\n");
+    printf("Interceptor added\n");
+    printf("\n");
+
+    log_info("This is an info message");
+    log_error("This is an error message%s", "123");
+    log_fatal("This is an fatal message");
+    log_debug("This is a debug message");
+    log_warning("This is a warning message%s", "123");
+
+    destroyDefaultLogger();
+    return 0;
+}
+```
 

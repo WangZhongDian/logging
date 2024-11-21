@@ -42,45 +42,28 @@ static bool addInterceptor(log_Interceptor *Interceptor) {
         return false;
     }
     if (G_LOGGER->interceptor == NULL) {
-        G_LOGGER->interceptor = Interceptor;
+        G_LOGGER->interceptor       = Interceptor;
+        G_LOGGER->interceptor->next = NULL;
         return true;
     }
 
-    G_LOGGER->interceptor->_free(G_LOGGER->interceptor);
-    G_LOGGER->interceptor = Interceptor;
+    log_Interceptor *it = G_LOGGER->interceptor;
+    while (it->next != NULL) {
+        it = it->next;
+    }
+
+    it->next          = Interceptor;
+    Interceptor->next = NULL;
     return true;
 }
 
-/**
- * @brief 内部日志打印处理核心函数
- * @param level 日志等级
- * @param color 应用的颜色
- * @param message 日志内容
- * @param ... 格式化参数列表
- * @return
- */
-static void
-_builtin_log(char *level, const char *color, const char *message, ...) {
-    if (G_LOGGER == NULL) {
-        return;
-    }
-    if (G_LOGGER->handler == NULL) {
-        return;
-    }
+static void output_to_handler(log_Handler *handler,
+                              char        *level,
+                              const char  *color,
+                              const char  *message) {
     char timeStr[20];
     getTimeStr(timeStr);
     char logStr[LOG_BUFFER_SIZE];
-
-    log_Handler *handler = G_LOGGER->handler;
-
-    if (G_LOGGER->interceptor != NULL) {
-        if (G_LOGGER->interceptor->_dispose(level, message)) {
-            if (G_LOGGER->interceptor->handler != NULL) {
-                handler = G_LOGGER->interceptor->handler;
-            }
-        }
-    }
-
     if (handler->apply_color)
         sprintf(logStr,
                 "[%s]: %s %s%s%s %s\n",
@@ -101,6 +84,36 @@ _builtin_log(char *level, const char *color, const char *message, ...) {
     handler->output(handler, logStr);
 }
 
+/**
+ * @brief 内部日志打印处理核心函数
+ * @param level 日志等级
+ * @param color 应用的颜色
+ * @param message 日志内容
+ * @param ... 格式化参数列表
+ * @return
+ */
+static void _builtin_cope(char *level, const char *color, const char *message) {
+    if (G_LOGGER == NULL) {
+        return;
+    }
+    if (G_LOGGER->handler == NULL) {
+        return;
+    }
+
+    log_Interceptor *it      = G_LOGGER->interceptor;
+    log_Handler     *handler = G_LOGGER->handler;
+
+    while (it != NULL) {
+        if (it->_dispose(it, level, message)) {
+            output_to_handler(it->handler, level, color, message);
+            if (it->jump_out)
+                return;
+        }
+        it = it->next;
+    }
+    output_to_handler(handler, level, color, message);
+}
+
 void log_fatal(const char *message, ...) {
     if (G_LOGGER->level >= LOG_ERROR) {
         char    logStr[LOG_BUFFER_SIZE];
@@ -108,7 +121,7 @@ void log_fatal(const char *message, ...) {
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_log("Fatal", RED_B, logStr, args);
+        _builtin_cope("Fatal", RED_B, logStr);
     }
 }
 
@@ -119,7 +132,7 @@ void log_error(const char *message, ...) {
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_log("Error", RED, logStr, args);
+        _builtin_cope("Error", RED, logStr);
     }
 }
 
@@ -130,7 +143,7 @@ void log_warning(const char *message, ...) {
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_log("Warning", YELLOW, logStr, args);
+        _builtin_cope("Warning", YELLOW, logStr);
     }
 }
 
@@ -141,7 +154,7 @@ void log_info(const char *message, ...) {
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_log("Info", GREEN, logStr, args);
+        _builtin_cope("Info", GREEN, logStr);
     }
 }
 
@@ -152,7 +165,7 @@ void log_debug(const char *message, ...) {
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_log("Debug", CYAN, logStr, args);
+        _builtin_cope("Debug", CYAN, logStr);
     }
 }
 
@@ -187,7 +200,13 @@ log_status destroyDefaultLogger(void) {
         }
 
         if (G_LOGGER->interceptor != NULL) {
-            G_LOGGER->interceptor->_free(G_LOGGER->interceptor);
+            log_Interceptor *it   = G_LOGGER->interceptor;
+            log_Interceptor *next = NULL;
+            while (it != NULL) {
+                next = it->next;
+                it->_free(it);
+                it = next;
+            }
         }
 
         free(G_LOGGER);
