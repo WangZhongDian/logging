@@ -101,7 +101,7 @@ _builtin_log(char *level, const char *color, const char *message, ...) {
     handler->output(handler, logStr);
 }
 
-static void fatal(const char *message, ...) {
+void log_fatal(const char *message, ...) {
     if (G_LOGGER->level >= LOG_ERROR) {
         char    logStr[LOG_BUFFER_SIZE];
         va_list args;
@@ -112,7 +112,7 @@ static void fatal(const char *message, ...) {
     }
 }
 
-static void error(const char *message, ...) {
+void log_error(const char *message, ...) {
     if (G_LOGGER->level >= LOG_ERROR) {
         char    logStr[LOG_BUFFER_SIZE];
         va_list args;
@@ -123,7 +123,7 @@ static void error(const char *message, ...) {
     }
 }
 
-static void warning(const char *message, ...) {
+void log_warning(const char *message, ...) {
     if (G_LOGGER->level >= LOG_WARNING) {
         char    logStr[LOG_BUFFER_SIZE];
         va_list args;
@@ -134,7 +134,7 @@ static void warning(const char *message, ...) {
     }
 }
 
-static void info(const char *message, ...) {
+void log_info(const char *message, ...) {
     if (G_LOGGER->level >= LOG_INFO) {
         char    logStr[LOG_BUFFER_SIZE];
         va_list args;
@@ -145,7 +145,7 @@ static void info(const char *message, ...) {
     }
 }
 
-static void debug(const char *message, ...) {
+void log_debug(const char *message, ...) {
     if (G_LOGGER->level >= LOG_DEBUG) {
         char    logStr[LOG_BUFFER_SIZE];
         va_list args;
@@ -156,7 +156,7 @@ static void debug(const char *message, ...) {
     }
 }
 
-Logger *newLogger(const char *name, log_level level) {
+Logger *newDefaultLogger(const char *name, log_level level) {
     if (G_LOGGER != NULL) {
         G_LOGGER->name  = name;
         G_LOGGER->level = level;
@@ -164,12 +164,6 @@ Logger *newLogger(const char *name, log_level level) {
     }
 
     Logger *logger         = (Logger *)malloc(sizeof(Logger));
-
-    logger->fatal          = fatal;
-    logger->error          = error;
-    logger->warning        = warning;
-    logger->info           = info;
-    logger->debug          = debug;
 
     logger->addHandler     = addHandler;
     logger->addInterceptor = addInterceptor;
@@ -186,7 +180,7 @@ Logger *newLogger(const char *name, log_level level) {
 /**
  * @brief 销毁日志对象
  */
-log_status destroyLogger(void) {
+log_status destroyDefaultLogger(void) {
     if (G_LOGGER != NULL) {
         if (G_LOGGER->handler != NULL) {
             G_LOGGER->handler->_free(G_LOGGER->handler);
