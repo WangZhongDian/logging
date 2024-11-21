@@ -66,7 +66,6 @@ static bool _disposeSubstring(log_Interceptor *interceptor,
         if (level <= interceptor->level)
             return true;
         return false;
-    }
 
     while (keyword != NULL && level <= interceptor->level) {
         if (kmp_search(keyword->key, (char *)message))
