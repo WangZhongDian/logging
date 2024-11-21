@@ -9,6 +9,10 @@
 extern "C" {
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct log_Interceptor {
     log_level    level;
     log_Handler *handler;
@@ -33,6 +37,10 @@ log_Interceptor *loggingSubStringInterceptor(char        *keywords[],
                                              log_level    level,
                                              log_Handler *handler,
                                              bool         jump_out);
+
+#ifdef __cplusplus
+}
+#endif
 
 #ifdef __cplusplus
 }
