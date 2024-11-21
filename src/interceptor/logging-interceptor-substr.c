@@ -24,8 +24,10 @@ static void get_next(char *str, int *next) {
 }
 
 static bool kmp_search(char *substr, char *master) {
-    if(substr == NULL)return true;  //空串全匹配
-    if(master == NULL)return false;
+    if (substr == NULL)
+        return true; // 空串全匹配
+    if (master == NULL)
+        return false;
     int  i         = 0;
     int  j         = 0;
     int  substrlen = strlen(substr);
@@ -54,16 +56,19 @@ static bool kmp_search(char *substr, char *master) {
 }
 
 static bool _disposeSubstring(log_Interceptor *interceptor,
-                              char            *level,
+                              log_level        level,
                               const char      *message,
                               ...) {
     int         count   = 0;
     keywords_t *keyword = (keywords_t *)(interceptor + 1);
 
-    if (keyword->key == NULL && keyword->next == NULL)
+    if (keyword->key == NULL && keyword->next == NULL) {
+        if (level <= interceptor->level)
+            return true;
         return false;
+    }
 
-    while (keyword != NULL) {
+    while (keyword != NULL && level <= interceptor->level) {
         if (kmp_search(keyword->key, (char *)message))
             return true;
         keyword = keyword->next;
