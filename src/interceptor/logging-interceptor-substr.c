@@ -3,10 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
-static log_Interceptor *G_interceptor = NULL;
-
-static char **G_keywords              = NULL;
+typedef struct keywords_s {
+    char              *key;
+    struct keywords_s *next;
+} keywords_t;
 
 static void get_next(char *str, int *next) {
     next[1] = 0;
@@ -22,6 +24,8 @@ static void get_next(char *str, int *next) {
 }
 
 static bool kmp_search(char *substr, char *master) {
+    if(substr == NULL)return true;  //空串全匹配
+    if(master == NULL)return false;
     int  i         = 0;
     int  j         = 0;
     int  substrlen = strlen(substr);
@@ -49,62 +53,75 @@ static bool kmp_search(char *substr, char *master) {
         return false;
 }
 
-static bool _disposeSubstring(char *level, const char *message, ...) {
-    int count = 0;
+static bool _disposeSubstring(log_Interceptor *interceptor,
+                              char            *level,
+                              const char      *message,
+                              ...) {
+    int         count   = 0;
+    keywords_t *keyword = (keywords_t *)(interceptor + 1);
 
-    if (G_keywords == NULL) {
+    if (keyword->key == NULL && keyword->next == NULL)
         return false;
-    }
 
-    while (G_keywords[count] != NULL) {
-        if (kmp_search(G_keywords[count], (char *)message)) {
+    while (keyword != NULL) {
+        if (kmp_search(keyword->key, (char *)message))
             return true;
-        }
-        count++;
+        keyword = keyword->next;
     }
 
     return false;
 }
 
 static void _freeSubstring(log_Interceptor *interceptor) {
-    if (G_keywords != NULL) {
-        int sum = 0;
-        while (G_keywords[sum] != NULL) {
-            free(G_keywords[sum]);
-            sum++;
-        }
-        free(G_keywords[sum]);
-        free(G_keywords);
-        G_keywords = NULL;
+    keywords_t *it_keyword =
+        (keywords_t *)(interceptor + 1); // it_keyword 不是起始地址，请勿free
+    keywords_t *keyword = it_keyword->next;
+    keywords_t *next    = NULL;
+
+    while (keyword != NULL) {
+        next = keyword->next;
+        free(keyword->key);
+        free(keyword);
+        keyword = next;
     }
 
     if (interceptor->handler != NULL) {
         interceptor->handler->_free(interceptor->handler);
     }
 
-    if (interceptor != NULL)
-        free(interceptor);
+    if (it_keyword->key != NULL)
+        free(it_keyword->key);
+    free(interceptor);
 }
 
 log_Interceptor *loggingSubStringInterceptor(char        *keywords[],
-                                             int          count,
                                              log_level    level,
-                                             log_Handler *handler) {
+                                             log_Handler *handler,
+                                             bool         jump_out) {
     log_Interceptor *interceptor =
-        (log_Interceptor *)malloc(sizeof(log_Interceptor));
+        (log_Interceptor *)malloc(sizeof(log_Interceptor) + sizeof(keywords_t));
     interceptor->_dispose = _disposeSubstring;
     interceptor->handler  = handler;
     interceptor->level    = level;
+    interceptor->jump_out = jump_out;
     interceptor->_free    = _freeSubstring;
 
-    G_keywords            = (char **)malloc((sizeof(G_keywords) * (count + 1)));
-
-    for (int i = 0; i < count; i++) {
-        G_keywords[i] = (char *)malloc(strlen(keywords[i]) + 1);
-        strcpy(G_keywords[i], keywords[i]);
+    keywords_t *keyword   = (keywords_t *)(interceptor + 1);
+    keyword->key          = NULL;
+    int count             = 0;
+    if (keywords[count] != NULL) {
+        keyword->key = strdup(keywords[count]);
+        count++;
+        keyword->next = NULL;
     }
-    G_keywords[count] = NULL;
 
-    G_interceptor     = interceptor;
-    return G_interceptor;
+    while (keywords[count] != NULL) {
+        keyword->next = (keywords_t *)malloc(sizeof(keywords_t));
+        keyword       = keyword->next;
+        keyword->key  = strdup(keywords[count]);
+        count++;
+    }
+    keyword->next = NULL;
+
+    return interceptor;
 }

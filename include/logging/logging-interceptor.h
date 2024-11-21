@@ -3,6 +3,11 @@
 
 #include "logging-core.h"
 #include "logging-handler.h"
+#include <stdbool.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -11,9 +16,13 @@ extern "C" {
 typedef struct log_Interceptor {
     log_level    level;
     log_Handler *handler;
-    bool (*_dispose)(char *level, const char *message, ...);
+    bool         jump_out;
+    bool (*_dispose)(struct log_Interceptor *Interceptor,
+                     char                   *level,
+                     const char             *message,
+                     ...);
     void (*_free)(struct log_Interceptor *Interceptor);
-
+    struct log_Interceptor *next;
 } log_Interceptor;
 
 /**
@@ -25,9 +34,13 @@ typedef struct log_Interceptor {
  * @return log_Interceptor *
  */
 log_Interceptor *loggingSubStringInterceptor(char        *keywords[],
-                                             int          count,
                                              log_level    level,
-                                             log_Handler *handler);
+                                             log_Handler *handler,
+                                             bool         jump_out);
+
+#ifdef __cplusplus
+}
+#endif
 
 #ifdef __cplusplus
 }
