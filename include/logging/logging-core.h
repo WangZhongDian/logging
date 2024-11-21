@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 typedef enum {
-    LOG_FATAL,
+    LOG_FATAL = 0,
     LOG_ERROR,
     LOG_WARNING,
     LOG_INFO,

@@ -1,4 +1,5 @@
 #include "logging.h"
+#include "logging/logging-core.h"
 #include "logging/logging-handler.h"
 #include "utils/logging-utils.h"
 #include <stdbool.h>
@@ -92,7 +93,10 @@ static void output_to_handler(log_Handler *handler,
  * @param ... 格式化参数列表
  * @return
  */
-static void _builtin_cope(char *level, const char *color, const char *message) {
+static void _builtin_cope(log_level   level_e,
+                          char       *level,
+                          const char *color,
+                          const char *message) {
     if (G_LOGGER == NULL) {
         return;
     }
@@ -104,7 +108,7 @@ static void _builtin_cope(char *level, const char *color, const char *message) {
     log_Handler     *handler = G_LOGGER->handler;
 
     while (it != NULL) {
-        if (it->_dispose(it, level, message)) {
+        if (it->_dispose(it, level_e, message)) {
             output_to_handler(it->handler, level, color, message);
             if (it->jump_out)
                 return;
@@ -121,7 +125,7 @@ void log_fatal(const char *message, ...) {
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_cope("Fatal", RED_B, logStr);
+        _builtin_cope(LOG_FATAL, "Fatal", RED_B, logStr);
     }
 }
 
@@ -132,7 +136,7 @@ void log_error(const char *message, ...) {
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_cope("Error", RED, logStr);
+        _builtin_cope(LOG_ERROR, "Error", RED, logStr);
     }
 }
 
@@ -143,7 +147,7 @@ void log_warning(const char *message, ...) {
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_cope("Warning", YELLOW, logStr);
+        _builtin_cope(LOG_WARNING, "Warning", YELLOW, logStr);
     }
 }
 
@@ -154,7 +158,7 @@ void log_info(const char *message, ...) {
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_cope("Info", GREEN, logStr);
+        _builtin_cope(LOG_INFO, "Info", GREEN, logStr);
     }
 }
 
@@ -165,7 +169,7 @@ void log_debug(const char *message, ...) {
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_cope("Debug", CYAN, logStr);
+        _builtin_cope(LOG_DEBUG, "Debug", CYAN, logStr);
     }
 }
 

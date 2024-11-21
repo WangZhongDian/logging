@@ -18,7 +18,7 @@ typedef struct log_Interceptor {
     log_Handler *handler;
     bool         jump_out;
     bool (*_dispose)(struct log_Interceptor *Interceptor,
-                     char                   *level,
+                     log_level               level,
                      const char             *message,
                      ...);
     void (*_free)(struct log_Interceptor *Interceptor);
