@@ -1,39 +1,27 @@
-# C语言日志库logging
+# C language logging library logging
 
-[English](README.en.md)
+## brief
 
-## 简介
+Logging is a lightweight and easy-to-use C language log library that supports log level, log format, log output, log files, and other functions.
 
-logging是一个轻量级的简单易用C语言日志库，支持日志级别、日志格式、日志输出、日志文件等功能。
+## function
+- Support log levels: DEBUG, INFO, Warning, ERROR, FATAL
+- Support log formats: timestamp, log level, log content
+- Support log output: console, file
+- Support log files: automatic creation, automatic scrolling, log segmentation
 
-## 功能
-
-- 支持日志级别：DEBUG、INFO、WARN、ERROR、FATAL
-- 支持日志格式：时间戳、日志级别、日志内容
-- 支持日志输出：控制台、文件
-- 支持日志文件：自动创建、自动滚动、日志分割
-
-## 安装
-- conan安装使用
+## install
+- Conan
 ```shell
 conan create .
 ```
-- cmake安装使用
+- cmake
 ```shell
 ```
 
-## 安装
-- conan安装使用
-```shell
-conan create . --build=missing
-```
-- cmake安装使用
-```shell
-```
+## usage
 
-## 使用方法
-
-### 控制台日志
+### console log 
 ```c
 #include "logging.h"
 
@@ -51,7 +39,7 @@ int main() {
 }
 ```
 
-### 文件日志
+### file log
 ```c
 #include "logging.h"
 #include "logging/logging-handler.h"
@@ -71,14 +59,13 @@ int main() {
 }
 ```
 
-### 日志拦截器
-> 支持添加自定义的拦截器， 目前内置了子串拦截器
+### Logging Interceptor 
+> Support adding custom interceptors, currently with built-in substring interceptors
+> The function of an interceptor is to redirect intercepted logs to the interceptor's dedicated processor
 
-> 拦截器的作用:可以将拦截到的日志重定向到拦截器的专属处理器中
 
-
-#### 例子
-将拦截到的日志重定向到专属文件处理器中
+#### example
+Redirects intercepted logs to a dedicated file processor
 ```c
 #include "logging.h"
 #include <stdio.h>
