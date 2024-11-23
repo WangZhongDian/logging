@@ -62,12 +62,12 @@ int main() {
 ```
 
 ### Logging filter 
-> Support adding custom interceptors, currently with built-in substring interceptors
-> The function of an filter is to redirect intercepted logs to the filter's dedicated processor
+> Support adding custom filters, currently with built-in substring filters
+> The function of an filter is to redirect filtered logs to the filter's dedicated processor
 
 
 #### example
-Redirects intercepted logs to a dedicated file processor
+Redirects filtered logs to a dedicated file processor
 ```c
 #include "logging.h"
 #include <stdio.h>
@@ -106,7 +106,7 @@ int main() {
 }
 ```
 
-#### Multiple substring interceptors
+#### Multiple substring filters
 ```c
 #include "logging.h"
 #include <stdbool.h>
