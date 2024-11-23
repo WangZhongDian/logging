@@ -1,5 +1,6 @@
 #include "logging.h"
 #include "logging/logging-core.h"
+#include "logging/logging-filter.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <time.h>
@@ -13,28 +14,28 @@ int main() {
     log_debug("This is a debug message");
     log_warning("This is a warning message%s", "123");
 
-    char *test1[]         = {"This", NULL};
+    char *test1[] = {"This", NULL};
 
-    log_Interceptor *tint = loggingSubStringInterceptor(
-        test1,
-        LOG_DEBUG,
-        loggingFileHandler("test_interceptor", 1024 * 1024),
-        false);
+    log_filter *tint =
+        loggingFilterSubStr(test1,
+                            LOG_DEBUG,
+                            loggingHandlerFile("test_interceptor", 1024 * 1024),
+                            false);
 
-    logger->addInterceptor(tint);
+    logger->addFilter(tint);
 
-    char *test2[]          = {"123", NULL};
+    char *test2[]     = {"123", NULL};
 
-    log_Interceptor *tint1 = loggingSubStringInterceptor(
+    log_filter *tint1 = loggingFilterSubStr(
         test2,
         LOG_ERROR,
-        loggingFileHandler("test_interceptor1", 1024 * 1024),
+        loggingHandlerFile("test_interceptor1", 1024 * 1024),
         true);
 
-    logger->addInterceptor(tint1);
+    logger->addFilter(tint1);
 
     printf("\n");
-    printf("Interceptor added\n");
+    printf("filter added\n");
     printf("\n");
 
     log_info("This is an info message");

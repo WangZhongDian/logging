@@ -1,11 +1,11 @@
 #include "logging-utils.h"
-#include <time.h>
 #include <string.h>
+#include <time.h>
 
 /**
-* @brief 获取当前时间字符串
-* @param timeStr 存储时间字符串缓冲区指针
-*/
+ * @brief 获取当前时间字符串
+ * @param timeStr 存储时间字符串缓冲区指针
+ */
 void getTimeStr(char *timeStr) {
     time_t     t = time(NULL);
     struct tm *p = localtime(&t);
