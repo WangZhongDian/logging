@@ -2,7 +2,7 @@ project(logging)
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} SRC)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/handler SRC)
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/interceptor SRC)
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/filter SRC)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/utils SRC)
 
 if (SHARED)

@@ -5,20 +5,20 @@
 #include <stdbool.h>
 
 #include "logging/logging-core.h"
+#include "logging/logging-filter.h"
 #include "logging/logging-handler.h"
-#include "logging/logging-interceptor.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct Logger {
-    log_level        level;
-    log_Handler     *handler;
-    log_Interceptor *interceptor;
-    const char      *name;
+    log_level    level;
+    log_Handler *handler;
+    log_filter  *filter;
+    const char  *name;
     bool (*addHandler)(log_Handler *handler);
-    bool (*addInterceptor)(log_Interceptor *Interceptor);
+    bool (*addFilter)(log_filter *filter);
 } Logger;
 
 void log_fatal(const char *format, ...);

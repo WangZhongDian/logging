@@ -38,23 +38,23 @@ static bool addHandler(log_Handler *handler) {
     return true;
 }
 
-static bool addInterceptor(log_Interceptor *Interceptor) {
-    if (G_LOGGER == NULL || Interceptor == NULL) {
+static bool addFilter(log_filter *filter) {
+    if (G_LOGGER == NULL || filter == NULL) {
         return false;
     }
-    if (G_LOGGER->interceptor == NULL) {
-        G_LOGGER->interceptor       = Interceptor;
-        G_LOGGER->interceptor->next = NULL;
+    if (G_LOGGER->filter == NULL) {
+        G_LOGGER->filter       = filter;
+        G_LOGGER->filter->next = NULL;
         return true;
     }
 
-    log_Interceptor *it = G_LOGGER->interceptor;
+    log_filter *it = G_LOGGER->filter;
     while (it->next != NULL) {
         it = it->next;
     }
 
-    it->next          = Interceptor;
-    Interceptor->next = NULL;
+    it->next     = filter;
+    filter->next = NULL;
     return true;
 }
 
@@ -104,8 +104,8 @@ static void _builtin_cope(log_level   level_e,
         return;
     }
 
-    log_Interceptor *it      = G_LOGGER->interceptor;
-    log_Handler     *handler = G_LOGGER->handler;
+    log_filter  *it      = G_LOGGER->filter;
+    log_Handler *handler = G_LOGGER->handler;
 
     while (it != NULL) {
         if (it->_dispose(it, level_e, message)) {
@@ -180,17 +180,17 @@ Logger *newDefaultLogger(const char *name, log_level level) {
         return G_LOGGER;
     }
 
-    Logger *logger         = (Logger *)malloc(sizeof(Logger));
+    Logger *logger     = (Logger *)malloc(sizeof(Logger));
 
-    logger->addHandler     = addHandler;
-    logger->addInterceptor = addInterceptor;
+    logger->addHandler = addHandler;
+    logger->addFilter  = addFilter;
 
-    logger->level          = level;
-    logger->handler        = loggingConsoleHandler();
-    logger->name           = name;
-    logger->interceptor    = NULL;
+    logger->level      = level;
+    logger->handler    = loggingHandlerConsole();
+    logger->name       = name;
+    logger->filter     = NULL;
 
-    G_LOGGER               = logger;
+    G_LOGGER           = logger;
     return G_LOGGER;
 }
 
@@ -203,9 +203,9 @@ log_status destroyDefaultLogger(void) {
             G_LOGGER->handler->_free(G_LOGGER->handler);
         }
 
-        if (G_LOGGER->interceptor != NULL) {
-            log_Interceptor *it   = G_LOGGER->interceptor;
-            log_Interceptor *next = NULL;
+        if (G_LOGGER->filter != NULL) {
+            log_filter *it   = G_LOGGER->filter;
+            log_filter *next = NULL;
             while (it != NULL) {
                 next = it->next;
                 it->_free(it);
