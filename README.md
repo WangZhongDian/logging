@@ -14,12 +14,28 @@ logging是一个轻量级的简单易用C语言日志库，支持日志级别、
 - 支持日志文件：自动创建、自动滚动、日志分割
 
 ## 安装
-- conan安装使用
+### conan安装使用
 ```shell
-conan create .
+git clone https://github.com/WangZhongDian/logging.git
+cd logging
+conan create . 
 ```
-- cmake安装使用
+在你的项目的conanfile.txt中添加
+```txt
+[requires]
+logging/0.5.0
+```
+
 ```shell
+conan install . --build=missing
+```
+
+### cmake安装使用
+```shell
+git clone https://github.com/WangZhongDian/logging.git
+cd logging
+cmake build -B build . && cd build && cmake --build .
+cmake --install .
 ```
 
 ## 使用方法
