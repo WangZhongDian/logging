@@ -17,6 +17,10 @@ conan create .
 ```
 - cmake
 ```shell
+git clone https://github.com/WangZhongDian/logging.git
+cd logging
+cmake build -B build . && cd build && cmake --build .
+cmake --install .
 ```
 
 ## usage

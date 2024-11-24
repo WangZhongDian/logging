@@ -11,6 +11,7 @@
 
 #define FILE_NAME_MAX_SIZE 50
 
+// 文件日志处理器的扩展
 typedef struct log_Handler_file_ex_s {
     unsigned int file_size;
     unsigned int file_size_max;
@@ -57,6 +58,7 @@ log_Handler *loggingHandlerFile(const char *name, unsigned int max_size) {
     log_Handler           *handler    = NULL;
     log_Handler_file_ex_t *handler_ex = NULL;
 
+    /// 获取未写满于设置最大文件大小的文件名
     do {
         sprintf(new_file_name, "%s_%d.log", name, suffix++);
         fp = fopen(new_file_name, "at");
