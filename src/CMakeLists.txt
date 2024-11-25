@@ -11,3 +11,4 @@ else()
     add_library(${PROJECT_NAME} ${SRC})
 endif()
 
+install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib)
