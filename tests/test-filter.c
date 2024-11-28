@@ -6,7 +6,7 @@
 #include <time.h>
 
 int main() {
-    Logger *logger = newDefaultLogger("testLogger", LOG_DEBUG);
+    Logger *logger = newDefaultLogger(__FILE__, LOG_DEBUG);
 
     log_info("This is an info message");
     log_error("This is an error message%s", "123");

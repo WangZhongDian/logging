@@ -104,10 +104,10 @@ static void output_to_handler(log_Handler *handler,
  * @param ... 格式化参数列表
  * @return
  */
-static void _builtin_cope(log_level   level_e,
-                          char       *level,
-                          const char *color,
-                          const char *message) {
+static void log_cope(log_level   level_e,
+                     char       *level,
+                     const char *color,
+                     const char *message) {
     if (G_LOGGER == NULL) {
         return;
     }
@@ -136,7 +136,7 @@ void log_fatal(const char *message, ...) {
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_cope(LOG_FATAL, "Fatal", RED_B, logStr);
+        log_cope(LOG_FATAL, "Fatal", RED_B, logStr);
     }
 }
 
@@ -147,7 +147,7 @@ void log_error(const char *message, ...) {
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_cope(LOG_ERROR, "Error", RED, logStr);
+        log_cope(LOG_ERROR, "Error", RED, logStr);
     }
 }
 
@@ -158,7 +158,7 @@ void log_warning(const char *message, ...) {
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_cope(LOG_WARNING, "Warning", YELLOW, logStr);
+        log_cope(LOG_WARNING, "Warning", YELLOW, logStr);
     }
 }
 
@@ -169,7 +169,7 @@ void log_info(const char *message, ...) {
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_cope(LOG_INFO, "Info", GREEN, logStr);
+        log_cope(LOG_INFO, "Info", GREEN, logStr);
     }
 }
 
@@ -180,7 +180,7 @@ void log_debug(const char *message, ...) {
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_cope(LOG_DEBUG, "Debug", CYAN, logStr);
+        log_cope(LOG_DEBUG, "Debug", CYAN, logStr);
     }
 }
 
