@@ -8,11 +8,11 @@
 int main() {
     Logger *logger = newDefaultLogger("testLogger", LOG_DEBUG);
 
-    log_info("This is an info message");
-    log_error("This is an error message%s", "123");
-    log_fatal("This is an fatal message");
-    log_debug("This is a debug message");
-    log_warning("This is a warning message%s", "123");
+    Log_info("This is an info message");
+    Log_error("This is an error message%s", "123");
+    Log_fatal("This is an fatal message");
+    Log_debug("This is a debug message");
+    Log_warning("This is a warning message%s", "123");
 
     char *test1[] = {"This", NULL};
 
@@ -38,11 +38,11 @@ int main() {
     printf("filter added\n");
     printf("\n");
 
-    log_info("This is an info message");
-    log_error("This is an error message%s", "123");
-    log_fatal("This is an fatal message");
-    log_debug("This is a debug message");
-    log_warning("This is a warning message%s", "123");
+    Log_info("This is an info message");
+    Log_error("This is an error message%s", "123");
+    Log_fatal("This is an fatal message");
+    Log_debug("This is a debug message");
+    Log_warning("This is a warning message%s", "123");
 
     destroyDefaultLogger();
     return 0;

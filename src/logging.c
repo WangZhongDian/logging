@@ -16,7 +16,7 @@
 #define RESET  "\033[0m"
 #define CYAN   "\033[0;36m"
 
-#define LOG_BUFFER_SIZE 1024 // 日志缓冲区大小，单个日志长度不能超过该值
+#define LOG_BUFFER_SIZE 4096 // 日志缓冲区大小，单个日志长度不能超过该值
 
 static Logger *G_LOGGER = NULL; // 全局日志对象，唯一实例
 
@@ -75,23 +75,25 @@ static void output_to_handler(log_Handler *handler,
                               const char  *message) {
     char timeStr[20];
     getTimeStr(timeStr);
-    char logStr[LOG_BUFFER_SIZE];
+    char logStr[LOG_BUFFER_SIZE * 2];
     if (handler->apply_color)
-        sprintf(logStr,
-                "[%s]: %s %s%s%s %s\n",
-                G_LOGGER->name,
-                timeStr,
-                color,
-                level,
-                RESET,
-                message);
+        snprintf(logStr,
+                 LOG_BUFFER_SIZE * 2,
+                 "[%s]: %s %s%s%s %s\n",
+                 G_LOGGER->name,
+                 timeStr,
+                 color,
+                 level,
+                 RESET,
+                 message);
     else
-        sprintf(logStr,
-                "[%s]: %s %s %s\n",
-                G_LOGGER->name,
-                timeStr,
-                level,
-                message);
+        snprintf(logStr,
+                 LOG_BUFFER_SIZE * 2,
+                 "[%s]: %s %s %s\n",
+                 G_LOGGER->name,
+                 timeStr,
+                 level,
+                 message);
 
     handler->output(handler, logStr);
 }
@@ -129,58 +131,73 @@ static void _builtin_cope(log_level   level_e,
     output_to_handler(handler, level, color, message);
 }
 
-void log_fatal(const char *message, ...) {
+void log_fatal(const char *file, int line, const char *message, ...) {
     if (G_LOGGER->level >= LOG_ERROR) {
         char    logStr[LOG_BUFFER_SIZE];
+        char    finalLogStr[LOG_BUFFER_SIZE * 2];
         va_list args;
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_cope(LOG_FATAL, "Fatal", RED_B, logStr);
+        snprintf(
+            finalLogStr, LOG_BUFFER_SIZE * 2, "[%s:%d] %s", file, line, logStr);
+        _builtin_cope(LOG_FATAL, "Fatal", RED_B, finalLogStr);
     }
 }
 
-void log_error(const char *message, ...) {
+void log_error(const char *file, int line, const char *message, ...) {
     if (G_LOGGER->level >= LOG_ERROR) {
         char    logStr[LOG_BUFFER_SIZE];
+        char    finalLogStr[LOG_BUFFER_SIZE * 2];
         va_list args;
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_cope(LOG_ERROR, "Error", RED, logStr);
+        snprintf(
+            finalLogStr, LOG_BUFFER_SIZE * 2, "[%s:%d] %s", file, line, logStr);
+        _builtin_cope(LOG_ERROR, "Error", RED, finalLogStr);
     }
 }
 
-void log_warning(const char *message, ...) {
+void log_warning(const char *file, int line, const char *message, ...) {
     if (G_LOGGER->level >= LOG_WARNING) {
         char    logStr[LOG_BUFFER_SIZE];
+        char    finalLogStr[LOG_BUFFER_SIZE * 2];
         va_list args;
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_cope(LOG_WARNING, "Warning", YELLOW, logStr);
+        snprintf(
+            finalLogStr, LOG_BUFFER_SIZE * 2, "[%s:%d] %s", file, line, logStr);
+        _builtin_cope(LOG_WARNING, "Warning", YELLOW, finalLogStr);
     }
 }
 
-void log_info(const char *message, ...) {
+void log_info(const char *file, int line, const char *message, ...) {
     if (G_LOGGER->level >= LOG_INFO) {
         char    logStr[LOG_BUFFER_SIZE];
+        char    finalLogStr[LOG_BUFFER_SIZE * 2];
         va_list args;
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_cope(LOG_INFO, "Info", GREEN, logStr);
+        snprintf(
+            finalLogStr, LOG_BUFFER_SIZE * 2, "[%s:%d] %s", file, line, logStr);
+        _builtin_cope(LOG_INFO, "Info", GREEN, finalLogStr);
     }
 }
 
-void log_debug(const char *message, ...) {
+void log_debug(const char *file, int line, const char *message, ...) {
     if (G_LOGGER->level >= LOG_DEBUG) {
         char    logStr[LOG_BUFFER_SIZE];
+        char    finalLogStr[LOG_BUFFER_SIZE * 2];
         va_list args;
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
-        _builtin_cope(LOG_DEBUG, "Debug", CYAN, logStr);
+        snprintf(
+            finalLogStr, LOG_BUFFER_SIZE * 2, "[%s:%d] %s", file, line, logStr);
+        _builtin_cope(LOG_DEBUG, "Debug", CYAN, finalLogStr);
     }
 }
 
