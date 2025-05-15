@@ -19,7 +19,6 @@
 #define LOG_BUFFER_SIZE 4096 // 日志缓冲区大小，单个日志长度不能超过该值
 
 static Logger *G_LOGGER = NULL; // 全局日志对象，唯一实例
-static Logger *G_LOGGER = NULL; // 全局日志对象，唯一实例
 
 /**
  * @brief 为日志添加一个handler
@@ -153,7 +152,7 @@ void log_fatal(const char *file, int line, const char *message, ...) {
         va_end(args);
         snprintf(
             finalLogStr, LOG_BUFFER_SIZE * 2, "[%s:%d] %s", file, line, logStr);
-        _builtin_cope(LOG_FATAL, "Fatal", RED_B, finalLogStr);
+        log_cope(LOG_FATAL, "Fatal", RED_B, finalLogStr);
     }
 }
 
@@ -167,7 +166,7 @@ void log_error(const char *file, int line, const char *message, ...) {
         va_end(args);
         snprintf(
             finalLogStr, LOG_BUFFER_SIZE * 2, "[%s:%d] %s", file, line, logStr);
-        _builtin_cope(LOG_ERROR, "Error", RED, finalLogStr);
+        log_cope(LOG_ERROR, "Error", RED, finalLogStr);
     }
 }
 
@@ -181,7 +180,7 @@ void log_warning(const char *file, int line, const char *message, ...) {
         va_end(args);
         snprintf(
             finalLogStr, LOG_BUFFER_SIZE * 2, "[%s:%d] %s", file, line, logStr);
-        _builtin_cope(LOG_WARNING, "Warning", YELLOW, finalLogStr);
+        log_cope(LOG_WARNING, "Warning", YELLOW, finalLogStr);
     }
 }
 
@@ -195,7 +194,7 @@ void log_info(const char *file, int line, const char *message, ...) {
         va_end(args);
         snprintf(
             finalLogStr, LOG_BUFFER_SIZE * 2, "[%s:%d] %s", file, line, logStr);
-        _builtin_cope(LOG_INFO, "Info", GREEN, finalLogStr);
+        log_cope(LOG_INFO, "Info", GREEN, finalLogStr);
     }
 }
 
@@ -209,7 +208,7 @@ void log_debug(const char *file, int line, const char *message, ...) {
         va_end(args);
         snprintf(
             finalLogStr, LOG_BUFFER_SIZE * 2, "[%s:%d] %s", file, line, logStr);
-        _builtin_cope(LOG_DEBUG, "Debug", CYAN, finalLogStr);
+        log_cope(LOG_DEBUG, "Debug", CYAN, finalLogStr);
     }
 }
 
