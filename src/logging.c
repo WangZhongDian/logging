@@ -19,6 +19,7 @@
 #define LOG_BUFFER_SIZE 4096 // 日志缓冲区大小，单个日志长度不能超过该值
 
 static Logger *G_LOGGER = NULL; // 全局日志对象，唯一实例
+static Logger *G_LOGGER = NULL; // 全局日志对象，唯一实例
 
 /**
  * @brief 为日志添加一个handler
@@ -38,6 +39,10 @@ static bool addHandler(log_Handler *handler) {
     return true;
 }
 
+/**
+ * @brief 为日志添加一个filter
+ * @param filter 过滤器对象
+ */
 /**
  * @brief 为日志添加一个filter
  * @param filter 过滤器对象
@@ -62,6 +67,13 @@ static bool addFilter(log_filter *filter) {
     return true;
 }
 
+/**
+ * @brief 输出到handler
+ * @param handler 处理器对象
+ * @param level 日志等级
+ * @param color 应用的颜色
+ * @param message 日志内容
+ */
 /**
  * @brief 输出到handler
  * @param handler 处理器对象
@@ -106,10 +118,10 @@ static void output_to_handler(log_Handler *handler,
  * @param ... 格式化参数列表
  * @return
  */
-static void _builtin_cope(log_level   level_e,
-                          char       *level,
-                          const char *color,
-                          const char *message) {
+static void log_cope(log_level   level_e,
+                     char       *level,
+                     const char *color,
+                     const char *message) {
     if (G_LOGGER == NULL) {
         return;
     }

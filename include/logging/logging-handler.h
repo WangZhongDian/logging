@@ -16,11 +16,11 @@ typedef struct log_Handler {
 
 /**
  * @brief 文件处理器
- * @param name 文件名
+ * @param file_name 文件名
  * @param max_size 文件最大大小
  * @return
  */
-log_Handler *loggingHandlerFile(const char *name, unsigned int max_size);
+log_Handler *loggingHandlerFile(const char *file_name, unsigned int max_size);
 
 /**
  * @brief 控制台处理器

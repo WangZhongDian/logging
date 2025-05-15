@@ -50,7 +50,7 @@ static void outputFileHandler(log_Handler *handler, const char *message) {
         changeFile(handler);
 }
 
-log_Handler *loggingHandlerFile(const char *name, unsigned int max_size) {
+log_Handler *loggingHandlerFile(const char *file_name, unsigned int max_size) {
     char                   new_file_name[FILE_NAME_MAX_SIZE];
     int                    suffix = 0;
     unsigned int           file_size;
@@ -60,7 +60,7 @@ log_Handler *loggingHandlerFile(const char *name, unsigned int max_size) {
 
     /// 获取未写满于设置最大文件大小的文件名
     do {
-        sprintf(new_file_name, "%s_%d.log", name, suffix++);
+        sprintf(new_file_name, "%s_%d.log", file_name, suffix++);
         fp = fopen(new_file_name, "at");
         if (fp == NULL)
             goto ERROR;
@@ -77,7 +77,7 @@ log_Handler *loggingHandlerFile(const char *name, unsigned int max_size) {
     handler_ex->file_size_max = max_size;
     handler_ex->file_size     = file_size;
     handler_ex->suffix        = suffix;
-    handler_ex->file_name     = strdup(name);
+    handler_ex->file_name     = strdup(file_name);
     if (handler_ex->file_name == NULL)
         goto ERROR;
 

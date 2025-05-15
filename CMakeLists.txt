@@ -24,3 +24,9 @@ if (TEST)
     enable_testing()
     add_subdirectory(tests)
 endif()
+
+
+install(FILES include/logging.h DESTINATION include)
+install(FILES include/logging/logging-core.h DESTINATION include/logging)
+install(FILES include/logging/logging-filter.h DESTINATION include/logging)
+install(FILES include/logging/logging-handler.h DESTINATION include/logging)
