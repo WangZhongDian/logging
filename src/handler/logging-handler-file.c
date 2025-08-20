@@ -7,7 +7,7 @@
 // log_Handler_file_ex_t与log_Handler处于连续内存中
 // 使用char*指针进行偏移，达到以偏移1个字节为单位的偏移
 #define Handler_file_EX_PRT(handler)                                           \
-    ((log_Handler_file_ex_t *)((char *)handler + sizeof(log_Handler)))
+    ((log_Handler_file_ex_t *)((char *)(handler) + sizeof(log_Handler)))
 
 #define FILE_NAME_MAX_SIZE 50
 
@@ -46,8 +46,9 @@ static void outputFileHandler(log_Handler *handler, const char *message) {
     fputs(message, handler->stream);
     log_Handler_file_ex_t *handler_ex = Handler_file_EX_PRT(handler);
     handler_ex->file_size += strlen(message);
-    if (handler_ex->file_size > handler_ex->file_size_max)
+    if (handler_ex->file_size > handler_ex->file_size_max) {
         changeFile(handler);
+}
 }
 
 log_Handler *loggingHandlerFile(const char *file_name, unsigned int max_size) {
@@ -62,24 +63,27 @@ log_Handler *loggingHandlerFile(const char *file_name, unsigned int max_size) {
     do {
         sprintf(new_file_name, "%s_%d.log", file_name, suffix++);
         fp = fopen(new_file_name, "at");
-        if (fp == NULL)
+        if (fp == NULL) {
             goto ERROR;
+}
         file_size = getFileSize(fp);
     } while (file_size > max_size);
 
     /// 分配log_Handler与记录文件大小的空间
     handler = (log_Handler *)malloc(sizeof(log_Handler) +
                                     sizeof(log_Handler_file_ex_t));
-    if (handler == NULL)
+    if (handler == NULL) {
         goto ERROR;
+}
 
     handler_ex                = Handler_file_EX_PRT(handler);
     handler_ex->file_size_max = max_size;
     handler_ex->file_size     = file_size;
     handler_ex->suffix        = suffix;
     handler_ex->file_name     = strdup(file_name);
-    if (handler_ex->file_name == NULL)
+    if (handler_ex->file_name == NULL) {
         goto ERROR;
+}
 
     handler->stream      = fp;
     handler->apply_color = false;
@@ -88,8 +92,9 @@ log_Handler *loggingHandlerFile(const char *file_name, unsigned int max_size) {
     return handler;
 
 ERROR:
-    if (fp)
+    if (fp) {
         fclose(fp);
+}
     if (handler) {
         free(Handler_file_EX_PRT(handler)->file_name); // 直接释放，无需检查NULL
         free(handler);

@@ -24,15 +24,17 @@ static void get_next(char *str, int *next) {
 }
 
 static bool kmp_search(char *substr, char *master) {
-    if (substr == NULL)
+    if (substr == NULL) {
         return true; // 空串全匹配
-    if (master == NULL)
+    }
+    if (master == NULL) {
         return false;
-    int  i         = 0;
-    int  j         = 0;
-    int  substrlen = strlen(substr);
-    int  masterlen = strlen(master);
-    int *next      = (int *)malloc(sizeof(int) * (substrlen + 1));
+    }
+    int    i         = 0;
+    int    j         = 0;
+    size_t substrlen = strlen(substr);
+    size_t masterlen = strlen(master);
+    int   *next      = (int *)malloc(sizeof(int) * (substrlen + 1));
     get_next(substr, next);
 
     while (i < masterlen && j < substrlen) {
@@ -49,10 +51,11 @@ static bool kmp_search(char *substr, char *master) {
     }
 
     free(next);
-    if (j == substrlen)
+    if (j == substrlen) {
         return true;
-    else
+    } else {
         return false;
+    }
 }
 
 static bool _disposeSubstring(log_filter *filter,
@@ -63,14 +66,16 @@ static bool _disposeSubstring(log_filter *filter,
     keywords_t *keyword = (keywords_t *)(filter + 1);
 
     if (keyword->key == NULL && keyword->next == NULL) {
-        if (level <= filter->level)
+        if (level <= filter->level) {
             return true;
+        }
         return false;
     }
 
     while (keyword != NULL && level <= filter->level) {
-        if (kmp_search(keyword->key, (char *)message))
+        if (kmp_search(keyword->key, (char *)message)) {
             return true;
+        }
         keyword = keyword->next;
     }
 
@@ -94,8 +99,9 @@ static void _freeFilter(log_filter *filter) {
         filter->handler->_free(filter->handler);
     }
 
-    if (it_keyword->key != NULL)
+    if (it_keyword->key != NULL) {
         free(it_keyword->key);
+    }
     free(filter);
 }
 

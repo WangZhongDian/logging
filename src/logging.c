@@ -87,7 +87,7 @@ static void output_to_handler(log_Handler *handler,
     char timeStr[20];
     getTimeStr(timeStr);
     char logStr[LOG_BUFFER_SIZE * 2];
-    if (handler->apply_color)
+    if (handler->apply_color) {
         snprintf(logStr,
                  LOG_BUFFER_SIZE * 2,
                  "[%s]: %s %s%s%s %s\n",
@@ -97,7 +97,7 @@ static void output_to_handler(log_Handler *handler,
                  level,
                  RESET,
                  message);
-    else
+    } else {
         snprintf(logStr,
                  LOG_BUFFER_SIZE * 2,
                  "[%s]: %s %s %s\n",
@@ -105,6 +105,7 @@ static void output_to_handler(log_Handler *handler,
                  timeStr,
                  level,
                  message);
+    }
 
     handler->output(handler, logStr);
 }
@@ -134,8 +135,9 @@ static void log_cope(log_level   level_e,
     while (it != NULL) {
         if (it->_dispose(it, level_e, message)) {
             output_to_handler(it->handler, level, color, message);
-            if (it->jump_out)
+            if (it->jump_out) {
                 return;
+            }
         }
         it = it->next;
     }
