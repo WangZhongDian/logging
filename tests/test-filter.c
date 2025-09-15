@@ -6,13 +6,13 @@
 #include <time.h>
 
 int main() {
-    Logger *logger = newDefaultLogger(__FILE__, LOG_DEBUG);
+    initDefaultLogger("test-filter", LOG_DEBUG);
 
-    log_info("This is an info message");
-    log_error("This is an error message%s", "123");
-    log_fatal("This is an fatal message");
-    log_debug("This is a debug message");
-    log_warning("This is a warning message%s", "123");
+    Log_info("This is an info message");
+    Log_error("This is an error message%s", "123");
+    Log_fatal("This is an fatal message");
+    Log_debug("This is a debug message");
+    Log_warning("This is a warning message%s", "123");
 
     char *test1[] = {"This", NULL};
 
@@ -22,7 +22,7 @@ int main() {
                             loggingHandlerFile("test_interceptor", 1024 * 1024),
                             false);
 
-    logger->addFilter(tint);
+    addFilter(getDefaultLogger(), tint);
 
     char *test2[]     = {"123", NULL};
 
@@ -32,17 +32,17 @@ int main() {
         loggingHandlerFile("test_interceptor1", 1024 * 1024),
         true);
 
-    logger->addFilter(tint1);
+    addFilter(getDefaultLogger(), tint1);
 
     printf("\n");
     printf("filter added\n");
     printf("\n");
 
-    log_info("This is an info message");
-    log_error("This is an error message%s", "123");
-    log_fatal("This is an fatal message");
-    log_debug("This is a debug message");
-    log_warning("This is a warning message%s", "123");
+    Log_info("This is an info message");
+    Log_error("This is an error message%s", "123");
+    Log_fatal("This is an fatal message");
+    Log_debug("This is a debug message");
+    Log_warning("This is a warning message%s", "123");
 
     destroyDefaultLogger();
     return 0;

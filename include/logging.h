@@ -3,6 +3,7 @@
 
 #include <stdarg.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "logging/logging-core.h"
 #include "logging/logging-filter.h"
@@ -12,51 +13,77 @@
 extern "C" {
 #endif
 
-#define log_fatal(format, ...)                                                 \
-    _log_fatal(__FILE__, __LINE__, format, ##__VA_ARGS__)
-#define log_error(format, ...)                                                 \
-    _log_error(__FILE__, __LINE__, format, ##__VA_ARGS__)
-#define log_warning(format, ...)                                               \
-    _log_warning(__FILE__, __LINE__, format, ##__VA_ARGS__)
-#define log_info(format, ...)                                                  \
-    _log_info(__FILE__, __LINE__, format, ##__VA_ARGS__)
-#define log_debug(format, ...)                                                 \
-    _log_debug(__FILE__, __LINE__, format, ##__VA_ARGS__)
+// 默认日志器宏
+#define Log_fatal(format, ...)                                                 \
+    _log_fatal(NULL, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define Log_error(format, ...)                                                 \
+    _log_error(NULL, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define Log_warning(format, ...)                                               \
+    _log_warning(NULL, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define Log_info(format, ...)                                                  \
+    _log_info(NULL, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define Log_debug(format, ...)                                                 \
+    _log_debug(NULL, __FILE__, __LINE__, format, ##__VA_ARGS__)
+
+// 日志器宏
+#define log_fatal(logger, format, ...)                                         \
+    _log_fatal(logger, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define log_error(logger, format, ...)                                         \
+    _log_error(logger, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define log_warning(logger, format, ...)                                       \
+    _log_warning(logger, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define log_info(logger, format, ...)                                          \
+    _log_info(logger, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define log_debug(logger, format, ...)                                         \
+    _log_debug(logger, __FILE__, __LINE__, format, ##__VA_ARGS__)
 
 typedef struct Logger {
     log_level    level;
     log_Handler *handler;
     log_filter  *filter;
     const char  *name;
-    bool (*addHandler)(log_Handler *handler);
-    bool (*addFilter)(log_filter *filter);
 } Logger;
 
-void _log_fatal(const char *file, int line, const char *format, ...);
-void _log_error(const char *file, int line, const char *format, ...);
-void _log_warning(const char *file, int line, const char *format, ...);
-void _log_info(const char *file, int line, const char *format, ...);
-void _log_debug(const char *file, int line, const char *format, ...);
+bool addHandler(Logger *logger, log_Handler *handler);
+bool addFilter(Logger *logger, log_filter *filter);
+
+void _log_fatal(
+    Logger *logger, const char *file, int line, const char *format, ...);
+void _log_error(
+    Logger *logger, const char *file, int line, const char *format, ...);
+void _log_warning(
+    Logger *logger, const char *file, int line, const char *format, ...);
+void _log_info(
+    Logger *logger, const char *file, int line, const char *format, ...);
+void _log_debug(
+    Logger *logger, const char *file, int line, const char *format, ...);
 
 /**
-* @brief
-创建默认日志对象,日志对象为单例模式，后续可通过getDefaultLogger方法获取，
-        重复调用该方法不会创建新的日志对象，只会返回默认日志对象，并且会修改默认日志对象的名称和等级
-* @param name 日志名称
-* @param level 日志等级
-* @return Logger* 日志对象指针
-*/
-Logger *newDefaultLogger(const char *name, log_level level);
+ * @brief 初始化默认日志对象
+ * @param name 日志名称
+ * @param level 日志等级
+ */
+void initDefaultLogger(const char *name, log_level level);
 
 /**
  * @brief 获取默认日志对象
+ * @return 默认日志对象
  */
 Logger *getDefaultLogger(void);
+
+Logger *getLogger(const char *name, log_level level);
 
 /**
  * @brief 销毁日志对象,该方法会销毁默认日志对象
  */
-log_status destroyDefaultLogger(void);
+void destroyDefaultLogger(void);
+
+/**
+ * @brief 销毁日志对象
+ * @param logger 日志对象
+ * @return void
+ */
+void destroyLogger(Logger *logger);
 
 #ifdef __cplusplus
 }
