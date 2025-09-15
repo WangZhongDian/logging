@@ -12,16 +12,16 @@
 extern "C" {
 #endif
 
-#define Log_fatal(format, ...)                                                 \
-    log_fatal(__FILE__, __LINE__, format, ##__VA_ARGS__)
-#define Log_error(format, ...)                                                 \
-    log_error(__FILE__, __LINE__, format, ##__VA_ARGS__)
-#define Log_warning(format, ...)                                               \
-    log_warning(__FILE__, __LINE__, format, ##__VA_ARGS__)
-#define Log_info(format, ...)                                                  \
-    log_info(__FILE__, __LINE__, format, ##__VA_ARGS__)
-#define Log_debug(format, ...)                                                 \
-    log_debug(__FILE__, __LINE__, format, ##__VA_ARGS__)
+#define log_fatal(format, ...)                                                 \
+    _log_fatal(__FILE__, __LINE__, format, ##__VA_ARGS__)
+#define log_error(format, ...)                                                 \
+    _log_error(__FILE__, __LINE__, format, ##__VA_ARGS__)
+#define log_warning(format, ...)                                               \
+    _log_warning(__FILE__, __LINE__, format, ##__VA_ARGS__)
+#define log_info(format, ...)                                                  \
+    _log_info(__FILE__, __LINE__, format, ##__VA_ARGS__)
+#define log_debug(format, ...)                                                 \
+    _log_debug(__FILE__, __LINE__, format, ##__VA_ARGS__)
 
 typedef struct Logger {
     log_level    level;
@@ -32,11 +32,11 @@ typedef struct Logger {
     bool (*addFilter)(log_filter *filter);
 } Logger;
 
-void log_fatal(const char *file, int line, const char *format, ...);
-void log_error(const char *file, int line, const char *format, ...);
-void log_warning(const char *file, int line, const char *format, ...);
-void log_info(const char *file, int line, const char *format, ...);
-void log_debug(const char *file, int line, const char *format, ...);
+void _log_fatal(const char *file, int line, const char *format, ...);
+void _log_error(const char *file, int line, const char *format, ...);
+void _log_warning(const char *file, int line, const char *format, ...);
+void _log_info(const char *file, int line, const char *format, ...);
+void _log_debug(const char *file, int line, const char *format, ...);
 
 /**
 * @brief

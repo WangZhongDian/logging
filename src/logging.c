@@ -144,7 +144,7 @@ static void log_cope(log_level   level_e,
     output_to_handler(handler, level, color, message);
 }
 
-void log_fatal(const char *file, int line, const char *message, ...) {
+void _log_fatal(const char *file, int line, const char *message, ...) {
     if (G_LOGGER->level >= LOG_ERROR) {
         char    logStr[LOG_BUFFER_SIZE];
         char    finalLogStr[LOG_BUFFER_SIZE * 2];
@@ -158,7 +158,7 @@ void log_fatal(const char *file, int line, const char *message, ...) {
     }
 }
 
-void log_error(const char *file, int line, const char *message, ...) {
+void _log_error(const char *file, int line, const char *message, ...) {
     if (G_LOGGER->level >= LOG_ERROR) {
         char    logStr[LOG_BUFFER_SIZE];
         char    finalLogStr[LOG_BUFFER_SIZE * 2];
@@ -172,7 +172,7 @@ void log_error(const char *file, int line, const char *message, ...) {
     }
 }
 
-void log_warning(const char *file, int line, const char *message, ...) {
+void _log_warning(const char *file, int line, const char *message, ...) {
     if (G_LOGGER->level >= LOG_WARNING) {
         char    logStr[LOG_BUFFER_SIZE];
         char    finalLogStr[LOG_BUFFER_SIZE * 2];
@@ -186,7 +186,7 @@ void log_warning(const char *file, int line, const char *message, ...) {
     }
 }
 
-void log_info(const char *file, int line, const char *message, ...) {
+void _log_info(const char *file, int line, const char *message, ...) {
     if (G_LOGGER->level >= LOG_INFO) {
         char    logStr[LOG_BUFFER_SIZE];
         char    finalLogStr[LOG_BUFFER_SIZE * 2];
@@ -200,7 +200,7 @@ void log_info(const char *file, int line, const char *message, ...) {
     }
 }
 
-void log_debug(const char *file, int line, const char *message, ...) {
+void _log_debug(const char *file, int line, const char *message, ...) {
     if (G_LOGGER->level >= LOG_DEBUG) {
         char    logStr[LOG_BUFFER_SIZE];
         char    finalLogStr[LOG_BUFFER_SIZE * 2];
