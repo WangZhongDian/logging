@@ -23,7 +23,7 @@ conan create .
 在你的项目的conanfile.txt中添加
 ```txt
 [requires]
-logging/0.5.0
+logging/1.0.0
 ```
 
 ```shell
