@@ -66,7 +66,7 @@ Logger *newLogger(const char *name);
  */
 Logger *getDefaultLogger(void);
 
-Logger *getLogger(const char *name, log_level level);
+Logger *getLogger(const char *name);
 
 /**
  * @brief 销毁日志对象,该方法会销毁默认日志对象

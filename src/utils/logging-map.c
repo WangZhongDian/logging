@@ -15,9 +15,8 @@ static uint32_t hash_bytes(const void *data, size_t len) {
 }
 
 /* 创建空 map */
-Map *map_create(size_t key_len, size_t value_len) {
+Map *map_create(size_t value_len) {
     Map *m        = calloc(1, sizeof(*m));
-    m->key_len    = key_len;
     m->value_len  = value_len;
     m->bucket_cap = 8; /* 初始桶数 */
     m->bucket     = calloc(m->bucket_cap, sizeof(Node *));
@@ -25,15 +24,16 @@ Map *map_create(size_t key_len, size_t value_len) {
 }
 
 /* 根据 key 找到桶下标 */
-static size_t bucket_index(Map *m, const void *key) {
-    uint32_t h = hash_bytes(key, m->key_len);
+static size_t bucket_index(Map *m, const char *key) {
+    size_t   len = strlen(key);
+    uint32_t h   = hash_bytes(key, len);
     return h & (m->bucket_cap - 1); /* 要求 bucket_cap 是 2 的幂 */
 }
 
 /* 在桶链中线性查找 */
-static Node *find_in_chain(Node *head, const void *key, size_t key_len) {
+static Node *find_in_chain(Node *head, const char *key) {
     for (; head; head = head->next) {
-        if (memcmp(head->kv, key, key_len) == 0) {
+        if (strcmp(head->key, key) == 0) {
             return head;
         }
     }
@@ -48,8 +48,9 @@ static void map_resize(Map *m) {
     for (size_t i = 0; i < m->bucket_cap; ++i) {
         Node *node = m->bucket[i];
         while (node) {
-            Node  *next     = node->next;
-            size_t idx      = hash_bytes(node->kv, m->key_len) & (new_cap - 1);
+            Node  *next = node->next;
+            size_t idx =
+                hash_bytes(node->key, strlen(node->key)) & (new_cap - 1);
             node->next      = new_bucket[idx];
             new_bucket[idx] = node;
             node            = next;
@@ -61,45 +62,47 @@ static void map_resize(Map *m) {
 }
 
 /* 插入或覆盖 */
-void map_put(Map *m, const void *key, const void *value) {
+void map_put(Map *m, const char *key, const void *value) {
     if (m->size * 4 >= m->bucket_cap * 3) { /* 装载因子 0.75 */
         map_resize(m);
     }
 
     size_t idx  = bucket_index(m, key);
-    Node  *node = find_in_chain(m->bucket[idx], key, m->key_len);
+    Node  *node = find_in_chain(m->bucket[idx], key);
 
     if (node) { /* 覆盖旧值 */
-        memcpy(node->kv + m->key_len, value, m->value_len);
+        memcpy(node->value, value, m->value_len);
         return;
     }
 
     /* 新建节点 */
-    node       = malloc(sizeof(*node));
-    node->kv   = malloc(m->key_len + m->value_len);
-    node->next = m->bucket[idx];
-    memcpy(node->kv, key, m->key_len);
-    memcpy(node->kv + m->key_len, value, m->value_len);
+    node        = malloc(sizeof(*node));
+    node->value = malloc(m->value_len);
+    node->next  = m->bucket[idx];
+    node->key   = malloc(strlen(key) + 1);
+    memcpy(node->key, key, strlen(key) + 1);
+    memcpy(node->value, value, m->value_len);
     m->bucket[idx] = node;
     ++m->size;
 }
 
 /* 查找 */
-void *map_get(Map *m, const void *key) {
+void *map_get(Map *m, const char *key) {
     size_t idx  = bucket_index(m, key);
-    Node  *node = find_in_chain(m->bucket[idx], key, m->key_len);
-    return node ? (node->kv + m->key_len) : NULL;
+    Node  *node = find_in_chain(m->bucket[idx], key);
+    return node ? node->value : NULL;
 }
 
 /* 删除 */
-bool map_erase(Map *m, const void *key) {
+bool map_erase(Map *m, const char *key) {
     size_t idx  = bucket_index(m, key);
     Node **link = &m->bucket[idx];
     for (; *link; link = &(*link)->next) {
-        if (memcmp((*link)->kv, key, m->key_len) == 0) {
+        if (strcmp((*link)->key, key) == 0) {
             Node *to_del = *link;
             *link        = to_del->next;
-            free(to_del->kv);
+            free(to_del->key);
+            free(to_del->value);
             free(to_del);
             --m->size;
             return true;
@@ -114,11 +117,27 @@ void map_destroy(Map *m) {
         Node *node = m->bucket[i];
         while (node) {
             Node *next = node->next;
-            free(node->kv);
+            free(node->key);
+            free(node->value);
             free(node);
             node = next;
         }
     }
     free(m->bucket);
     free(m);
+}
+
+/* 遍历 */
+void map_foreach(Map *m,
+                 void (*callback)(const char *key,
+                                  void       *value,
+                                  void       *user_data),
+                 void *user_data) {
+    for (size_t i = 0; i < m->bucket_cap; ++i) {
+        Node *node = m->bucket[i];
+        while (node) {
+            callback(node->key, node->value, user_data);
+            node = node->next;
+        }
+    }
 }

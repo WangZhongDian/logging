@@ -21,6 +21,8 @@
 
 static Logger *ROOT_LOGGER = NULL; // 根日志对象，唯一实例
 
+static Map *LOGGER_MAP     = NULL; // 日志对象映射表
+
 /**
  * @brief 为日志添加一个handler
  * @param handler 处理器对象
@@ -201,10 +203,16 @@ Logger *newLogger(const char *name) {
         return NULL;
     }
 
+    if (LOGGER_MAP == NULL) {
+        LOGGER_MAP = map_create(sizeof(Logger **));
+    }
+
     logger->level   = LOG_INFO;
     logger->handler = loggingHandlerConsole();
     logger->name    = name;
     logger->filter  = NULL;
+
+    map_put(LOGGER_MAP, name, &logger);
 
     return logger;
 }
@@ -224,17 +232,27 @@ Logger *getDefaultLogger(void) {
  * @param level 日志等级
  * @return 日志器对象
  */
-Logger *getLogger(const char *name, log_level level) {
+Logger *getLogger(const char *name) {
     if (name == NULL) {
         return NULL;
+    }
+    if (LOGGER_MAP == NULL) {
+        LOGGER_MAP = map_create(sizeof(Logger **));
+    }
+
+    Logger **cache_logger_ptr = (Logger **)map_get(LOGGER_MAP, name);
+    if (cache_logger_ptr != NULL) {
+        return *cache_logger_ptr;
     }
 
     Logger *logger  = (Logger *)malloc(sizeof(Logger));
 
-    logger->level   = level;
+    logger->level   = LOG_INFO;
     logger->handler = loggingHandlerConsole();
     logger->name    = name;
     logger->filter  = NULL;
+
+    map_put(LOGGER_MAP, name, &logger);
 
     return logger;
 }
@@ -258,7 +276,17 @@ void destroyLogger(Logger *logger) {
     }
 }
 
+static void
+__destroyLoggerForeach(const char *key, void *value, void *user_data) {
+    (void)user_data;
+    (void)key;
+    destroyLogger(*(Logger **)value);
+}
+
 /**
  * @brief 销毁日志对象
  */
-void destroyDefaultLogger(void) { destroyLogger(ROOT_LOGGER); }
+void destroyDefaultLogger(void) {
+    map_foreach(LOGGER_MAP, __destroyLoggerForeach, NULL);
+    map_destroy(LOGGER_MAP);
+}

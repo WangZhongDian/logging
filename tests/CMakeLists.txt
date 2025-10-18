@@ -20,6 +20,10 @@ add_executable(${PROJECT_NAME}filter test-filter.c)
 target_link_libraries(${PROJECT_NAME}filter logging)
 add_test(test_filter ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}filter${CMAKE_EXECUTEABLE_SUFFIX})
 
+#测试多log多次获取
+add_executable(${PROJECT_NAME}logs test-logs.c)
+target_link_libraries(${PROJECT_NAME}logs logging)
+add_test(test_logs ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}logs${CMAKE_EXECUTEABLE_SUFFIX})
 
 #测试工具map
 add_executable(${PROJECT_NAME}map test-map.c)
