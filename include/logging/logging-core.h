@@ -13,6 +13,14 @@ typedef enum {
     LOG_DEBUG,
 } log_level;
 
+static const char *LOG_LEVEL_STR[] = {
+    "FATAL",
+    "ERROR",
+    "WARNING",
+    "INFO",
+    "DEBUG",
+};
+
 typedef enum {
     L_ERROR,
     L_OK,
