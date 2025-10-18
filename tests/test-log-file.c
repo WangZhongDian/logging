@@ -2,9 +2,8 @@
 #include "logging/logging-handler.h"
 
 int main() {
-    Logger      *logger = newDefaultLogger("testLogger", LOG_DEBUG);
     log_Handler *hander = loggingHandlerFile("test_log", 1024 * 1024 * 10);
-    logger->addHandler(hander);
+    addHandler(getDefaultLogger(), hander);
 
     Log_info("This is an info message");
     Log_error("This is an error message%s", "123");
