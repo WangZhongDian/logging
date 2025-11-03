@@ -6,8 +6,6 @@
 #include <time.h>
 
 int main() {
-    Logger *logger = newDefaultLogger(__FILE__, LOG_DEBUG);
-
     Log_info("This is an info message");
     Log_error("This is an error message%s", "123");
     Log_fatal("This is an fatal message");
@@ -22,7 +20,7 @@ int main() {
                             loggingHandlerFile("test_interceptor", 1024 * 1024),
                             false);
 
-    logger->addFilter(tint);
+    loggingAddFilter(loggingGetDefaultLogger(), tint);
 
     char *test2[]     = {"123", NULL};
 
@@ -32,7 +30,7 @@ int main() {
         loggingHandlerFile("test_interceptor1", 1024 * 1024),
         true);
 
-    logger->addFilter(tint1);
+    loggingAddFilter(loggingGetDefaultLogger(), tint1);
 
     printf("\n");
     printf("filter added\n");
@@ -44,6 +42,6 @@ int main() {
     Log_debug("This is a debug message");
     Log_warning("This is a warning message%s", "123");
 
-    destroyDefaultLogger();
+    loggingDestroyAll();
     return 0;
 }

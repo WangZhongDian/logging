@@ -3,6 +3,7 @@
 
 #include <stdarg.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "logging/logging-core.h"
 #include "logging/logging-filter.h"
@@ -12,51 +13,73 @@
 extern "C" {
 #endif
 
+// 默认日志器宏
 #define Log_fatal(format, ...)                                                 \
-    log_fatal(__FILE__, __LINE__, format, ##__VA_ARGS__)
+    loggingMessage(NULL, LOG_FATAL, __FILE__, __LINE__, format, ##__VA_ARGS__)
 #define Log_error(format, ...)                                                 \
-    log_error(__FILE__, __LINE__, format, ##__VA_ARGS__)
+    loggingMessage(NULL, LOG_ERROR, __FILE__, __LINE__, format, ##__VA_ARGS__)
 #define Log_warning(format, ...)                                               \
-    log_warning(__FILE__, __LINE__, format, ##__VA_ARGS__)
+    loggingMessage(NULL, LOG_WARNING, __FILE__, __LINE__, format, ##__VA_ARGS__)
 #define Log_info(format, ...)                                                  \
-    log_info(__FILE__, __LINE__, format, ##__VA_ARGS__)
+    loggingMessage(NULL, LOG_INFO, __FILE__, __LINE__, format, ##__VA_ARGS__)
 #define Log_debug(format, ...)                                                 \
-    log_debug(__FILE__, __LINE__, format, ##__VA_ARGS__)
+    loggingMessage(NULL, LOG_DEBUG, __FILE__, __LINE__, format, ##__VA_ARGS__)
+
+// 日志器宏
+#define log_fatal(logger, format, ...)                                         \
+    loggingMessage(logger, LOG_FATAL, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define log_error(logger, format, ...)                                         \
+    loggingMessage(logger, LOG_ERROR, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define log_warning(logger, format, ...)                                       \
+    loggingMessage(                                                            \
+        logger, LOG_WARNING, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define log_info(logger, format, ...)                                          \
+    loggingMessage(logger, LOG_INFO, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define log_debug(logger, format, ...)                                         \
+    loggingMessage(logger, LOG_DEBUG, __FILE__, __LINE__, format, ##__VA_ARGS__)
 
 typedef struct Logger {
     log_level    level;
     log_Handler *handler;
     log_filter  *filter;
     const char  *name;
-    bool (*addHandler)(log_Handler *handler);
-    bool (*addFilter)(log_filter *filter);
 } Logger;
 
-void log_fatal(const char *file, int line, const char *format, ...);
-void log_error(const char *file, int line, const char *format, ...);
-void log_warning(const char *file, int line, const char *format, ...);
-void log_info(const char *file, int line, const char *format, ...);
-void log_debug(const char *file, int line, const char *format, ...);
+bool loggingAddHandler(Logger *logger, log_Handler *handler);
+bool loggingAddFilter(Logger *logger, log_filter *filter);
+
+void loggingMessage(Logger     *logger,
+                    log_level   level,
+                    const char *file,
+                    int         line,
+                    const char *message,
+                    ...);
 
 /**
-* @brief
-创建默认日志对象,日志对象为单例模式，后续可通过getDefaultLogger方法获取，
-        重复调用该方法不会创建新的日志对象，只会返回默认日志对象，并且会修改默认日志对象的名称和等级
-* @param name 日志名称
-* @param level 日志等级
-* @return Logger* 日志对象指针
-*/
-Logger *newDefaultLogger(const char *name, log_level level);
-
+ * @brief 创建一个日志句柄对象
+ * @param name 日志器名称
+ * @return 日志句柄对象
+ */
+Logger *loggingNewLogger(const char *name);
 /**
  * @brief 获取默认日志对象
+ * @return 默认日志对象
  */
-Logger *getDefaultLogger(void);
+Logger *loggingGetDefaultLogger(void);
+
+Logger *loggingGetLogger(const char *name);
 
 /**
  * @brief 销毁日志对象,该方法会销毁默认日志对象
  */
-log_status destroyDefaultLogger(void);
+void loggingDestroyAll(void);
+
+/**
+ * @brief 销毁日志对象
+ * @param logger 日志对象
+ * @return void
+ */
+void loggingDestroyLogger(Logger *logger);
 
 #ifdef __cplusplus
 }

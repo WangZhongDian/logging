@@ -1,6 +1,7 @@
 #include "logging.h"
 #include "logging/logging-core.h"
 #include "logging/logging-handler.h"
+#include "utils/logging-map.h"
 #include "utils/logging-utils.h"
 #include <stdbool.h>
 #include <stdio.h>
@@ -18,23 +19,25 @@
 
 #define LOG_BUFFER_SIZE 4096 // 日志缓冲区大小，单个日志长度不能超过该值
 
-static Logger *G_LOGGER = NULL; // 全局日志对象，唯一实例
+static Logger *ROOT_LOGGER = NULL; // 根日志对象，唯一实例
+
+static Map *LOGGER_MAP     = NULL; // 日志对象映射表
 
 /**
  * @brief 为日志添加一个handler
  * @param handler 处理器对象
  */
-static bool addHandler(log_Handler *handler) {
-    if (G_LOGGER == NULL || handler == NULL) {
+bool loggingAddHandler(Logger *logger, log_Handler *handler) {
+    if (logger == NULL || handler == NULL) {
         return false;
     }
-    if (G_LOGGER->handler == NULL) {
-        G_LOGGER->handler = handler;
+    if (logger->handler == NULL) {
+        logger->handler = handler;
         return true;
     }
 
-    G_LOGGER->handler->_free(G_LOGGER->handler);
-    G_LOGGER->handler = handler;
+    logger->handler->_free(logger->handler);
+    logger->handler = handler;
     return true;
 }
 
@@ -42,21 +45,17 @@ static bool addHandler(log_Handler *handler) {
  * @brief 为日志添加一个filter
  * @param filter 过滤器对象
  */
-/**
- * @brief 为日志添加一个filter
- * @param filter 过滤器对象
- */
-static bool addFilter(log_filter *filter) {
-    if (G_LOGGER == NULL || filter == NULL) {
+bool loggingAddFilter(Logger *logger, log_filter *filter) {
+    if (logger == NULL || filter == NULL) {
         return false;
     }
-    if (G_LOGGER->filter == NULL) {
-        G_LOGGER->filter       = filter;
-        G_LOGGER->filter->next = NULL;
+    if (logger->filter == NULL) {
+        logger->filter       = filter;
+        logger->filter->next = NULL;
         return true;
     }
 
-    log_filter *it = G_LOGGER->filter;
+    log_filter *it = logger->filter;
     while (it->next != NULL) {
         it = it->next;
     }
@@ -80,18 +79,19 @@ static bool addFilter(log_filter *filter) {
  * @param color 应用的颜色
  * @param message 日志内容
  */
-static void output_to_handler(log_Handler *handler,
-                              char        *level,
-                              const char  *color,
-                              const char  *message) {
+static void output_to_handler(Logger     *logger,
+                              char       *level,
+                              const char *color,
+                              const char *message) {
+
     char timeStr[20];
     getTimeStr(timeStr);
     char logStr[LOG_BUFFER_SIZE * 2];
-    if (handler->apply_color) {
+    if (logger->handler->apply_color) {
         snprintf(logStr,
                  LOG_BUFFER_SIZE * 2,
                  "[%s]: %s %s%s%s %s\n",
-                 G_LOGGER->name,
+                 logger->name,
                  timeStr,
                  color,
                  level,
@@ -101,13 +101,13 @@ static void output_to_handler(log_Handler *handler,
         snprintf(logStr,
                  LOG_BUFFER_SIZE * 2,
                  "[%s]: %s %s %s\n",
-                 G_LOGGER->name,
+                 logger->name,
                  timeStr,
                  level,
                  message);
     }
 
-    handler->output(handler, logStr);
+    logger->handler->output(logger->handler, logStr);
 }
 
 /**
@@ -118,134 +118,153 @@ static void output_to_handler(log_Handler *handler,
  * @param ... 格式化参数列表
  * @return
  */
-static void log_cope(log_level   level_e,
-                     char       *level,
-                     const char *color,
-                     const char *message) {
-    if (G_LOGGER == NULL) {
+static void
+log_cope(Logger *logger, char *level, const char *color, const char *message) {
+    if (logger == NULL) {
         return;
     }
-    if (G_LOGGER->handler == NULL) {
+    if (logger->handler == NULL) {
         return;
     }
 
-    log_filter  *it      = G_LOGGER->filter;
-    log_Handler *handler = G_LOGGER->handler;
+    log_filter  *it      = logger->filter;
+    log_Handler *handler = logger->handler;
 
     while (it != NULL) {
-        if (it->_dispose(it, level_e, message)) {
-            output_to_handler(it->handler, level, color, message);
+        if (it->_dispose(it, logger->level, message)) {
+            output_to_handler(logger, level, color, message);
             if (it->jump_out) {
                 return;
             }
         }
         it = it->next;
     }
-    output_to_handler(handler, level, color, message);
+    output_to_handler(logger, level, color, message);
 }
 
-void log_fatal(const char *file, int line, const char *message, ...) {
-    if (G_LOGGER->level >= LOG_ERROR) {
-        char    logStr[LOG_BUFFER_SIZE];
-        char    finalLogStr[LOG_BUFFER_SIZE * 2];
+void loggingMessage(Logger     *logger,
+                    log_level   level,
+                    const char *file,
+                    int         line,
+                    const char *message,
+                    ...) {
+    Logger *_logger = NULL;
+    if (logger == NULL) {
+        if (ROOT_LOGGER == NULL) {
+            ROOT_LOGGER = loggingNewLogger("ROOT"); // 创建根日志对象
+        }
+        _logger = ROOT_LOGGER;
+    } else {
+        _logger = logger; // 使用传入的日志对象
+    }
+
+    if (_logger->level >= level) {
+        char logStr
+            [LOG_BUFFER_SIZE]; // 定义一个缓冲区，用于存储格式化后的日志字符串
+        char    finalLogStr[LOG_BUFFER_SIZE *
+                         2]; // 定义一个缓冲区，用于存储最终输出的日志字符串
         va_list args;
         va_start(args, message);
         vsprintf(logStr, message, args);
         va_end(args);
         snprintf(
             finalLogStr, LOG_BUFFER_SIZE * 2, "[%s:%d] %s", file, line, logStr);
-        log_cope(LOG_FATAL, "Fatal", RED_B, finalLogStr);
+
+        switch (level) {
+        case LOG_DEBUG:
+            log_cope(_logger, "Debug", BLUE, finalLogStr);
+            break;
+        case LOG_INFO:
+            log_cope(_logger, "Info", GREEN, finalLogStr);
+            break;
+        case LOG_WARNING:
+            log_cope(_logger, "Warning", YELLOW, finalLogStr);
+            break;
+        case LOG_ERROR:
+            log_cope(_logger, "Error", RED, finalLogStr);
+            break;
+        case LOG_FATAL:
+            log_cope(_logger, "Fatal", RED_B, finalLogStr);
+            break;
+        default:
+            break;
+        }
     }
-}
-
-void log_error(const char *file, int line, const char *message, ...) {
-    if (G_LOGGER->level >= LOG_ERROR) {
-        char    logStr[LOG_BUFFER_SIZE];
-        char    finalLogStr[LOG_BUFFER_SIZE * 2];
-        va_list args;
-        va_start(args, message);
-        vsprintf(logStr, message, args);
-        va_end(args);
-        snprintf(
-            finalLogStr, LOG_BUFFER_SIZE * 2, "[%s:%d] %s", file, line, logStr);
-        log_cope(LOG_ERROR, "Error", RED, finalLogStr);
-    }
-}
-
-void log_warning(const char *file, int line, const char *message, ...) {
-    if (G_LOGGER->level >= LOG_WARNING) {
-        char    logStr[LOG_BUFFER_SIZE];
-        char    finalLogStr[LOG_BUFFER_SIZE * 2];
-        va_list args;
-        va_start(args, message);
-        vsprintf(logStr, message, args);
-        va_end(args);
-        snprintf(
-            finalLogStr, LOG_BUFFER_SIZE * 2, "[%s:%d] %s", file, line, logStr);
-        log_cope(LOG_WARNING, "Warning", YELLOW, finalLogStr);
-    }
-}
-
-void log_info(const char *file, int line, const char *message, ...) {
-    if (G_LOGGER->level >= LOG_INFO) {
-        char    logStr[LOG_BUFFER_SIZE];
-        char    finalLogStr[LOG_BUFFER_SIZE * 2];
-        va_list args;
-        va_start(args, message);
-        vsprintf(logStr, message, args);
-        va_end(args);
-        snprintf(
-            finalLogStr, LOG_BUFFER_SIZE * 2, "[%s:%d] %s", file, line, logStr);
-        log_cope(LOG_INFO, "Info", GREEN, finalLogStr);
-    }
-}
-
-void log_debug(const char *file, int line, const char *message, ...) {
-    if (G_LOGGER->level >= LOG_DEBUG) {
-        char    logStr[LOG_BUFFER_SIZE];
-        char    finalLogStr[LOG_BUFFER_SIZE * 2];
-        va_list args;
-        va_start(args, message);
-        vsprintf(logStr, message, args);
-        va_end(args);
-        snprintf(
-            finalLogStr, LOG_BUFFER_SIZE * 2, "[%s:%d] %s", file, line, logStr);
-        log_cope(LOG_DEBUG, "Debug", CYAN, finalLogStr);
-    }
-}
-
-Logger *newDefaultLogger(const char *name, log_level level) {
-    if (G_LOGGER != NULL) {
-        G_LOGGER->name  = name;
-        G_LOGGER->level = level;
-        return G_LOGGER;
-    }
-
-    Logger *logger     = (Logger *)malloc(sizeof(Logger));
-
-    logger->addHandler = addHandler;
-    logger->addFilter  = addFilter;
-
-    logger->level      = level;
-    logger->handler    = loggingHandlerConsole();
-    logger->name       = name;
-    logger->filter     = NULL;
-
-    G_LOGGER           = logger;
-    return G_LOGGER;
 }
 
 /**
- * @brief 销毁日志对象
+ * @brief 创建一个日志句柄
+ * @param name 日志器名称
+ * @return 日志器对象
  */
-log_status destroyDefaultLogger(void) {
-    if (G_LOGGER != NULL) {
-        if (G_LOGGER->handler != NULL) {
-            G_LOGGER->handler->_free(G_LOGGER->handler);
+Logger *loggingNewLogger(const char *name) {
+    Logger *logger = (Logger *)malloc(sizeof(Logger));
+    if (logger == NULL) {
+        return NULL;
+    }
+
+    if (LOGGER_MAP == NULL) {
+        LOGGER_MAP = map_create(sizeof(Logger **));
+    }
+
+    logger->level   = LOG_INFO;
+    logger->handler = loggingHandlerConsole();
+    logger->name    = name;
+    logger->filter  = NULL;
+
+    map_put(LOGGER_MAP, name, &logger);
+
+    return logger;
+}
+
+Logger *loggingGetDefaultLogger(void) {
+    if (ROOT_LOGGER != NULL) {
+        return ROOT_LOGGER;
+    }
+
+    ROOT_LOGGER = loggingNewLogger("ROOT");
+    return ROOT_LOGGER;
+}
+
+/**
+ * @brief 获取日志器对象
+ * @param name 日志器名称
+ * @param level 日志等级
+ * @return 日志器对象
+ */
+Logger *loggingGetLogger(const char *name) {
+    if (name == NULL) {
+        return NULL;
+    }
+    if (LOGGER_MAP == NULL) {
+        LOGGER_MAP = map_create(sizeof(Logger **));
+    }
+
+    Logger **cache_logger_ptr = (Logger **)map_get(LOGGER_MAP, name);
+    if (cache_logger_ptr != NULL) {
+        return *cache_logger_ptr;
+    }
+
+    Logger *logger  = (Logger *)malloc(sizeof(Logger));
+
+    logger->level   = LOG_INFO;
+    logger->handler = loggingHandlerConsole();
+    logger->name    = name;
+    logger->filter  = NULL;
+
+    map_put(LOGGER_MAP, name, &logger);
+
+    return logger;
+}
+
+void loggingDestroyLogger(Logger *logger) {
+    if (logger != NULL) {
+        if (logger->handler != NULL) {
+            logger->handler->_free(logger->handler);
         }
 
-        if (G_LOGGER->filter != NULL) {
-            log_filter *it   = G_LOGGER->filter;
+        if (logger->filter != NULL) {
+            log_filter *it   = logger->filter;
             log_filter *next = NULL;
             while (it != NULL) {
                 next = it->next;
@@ -253,16 +272,21 @@ log_status destroyDefaultLogger(void) {
                 it = next;
             }
         }
-
-        free(G_LOGGER);
-        G_LOGGER = NULL;
+        free(logger);
     }
-    return L_OK;
 }
 
-Logger *getDefaultLogger(void) {
-    if (G_LOGGER == NULL) {
-        return NULL;
-    }
-    return G_LOGGER;
+static void
+__destroyLoggerForeach(const char *key, void *value, void *user_data) {
+    (void)user_data;
+    (void)key;
+    loggingDestroyLogger(*(Logger **)value);
+}
+
+/**
+ * @brief 销毁日志对象
+ */
+void loggingDestroyAll(void) {
+    map_foreach(LOGGER_MAP, __destroyLoggerForeach, NULL);
+    map_destroy(LOGGER_MAP);
 }
