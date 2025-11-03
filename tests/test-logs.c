@@ -3,13 +3,13 @@
 #include <stdio.h>
 
 int main() {
-    Logger *t1  = getLogger("Test1");
+    Logger *t1  = loggingGetLogger("Test1");
     t1->level   = LOG_ERROR;
 
-    Logger *t2  = getLogger("Test2");
+    Logger *t2  = loggingGetLogger("Test2");
     t2->level   = LOG_DEBUG;
 
-    Logger *t11 = getLogger("Test1");
+    Logger *t11 = loggingGetLogger("Test1");
 
     if (t1 == t11) {
         printf("t1 and t11 are the same\n");
@@ -19,6 +19,6 @@ int main() {
         return 1;
     }
 
-    destroyDefaultLogger();
+    loggingDestroyAll();
     return 0;
 }

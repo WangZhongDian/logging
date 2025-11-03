@@ -3,7 +3,7 @@
 
 int main() {
     log_Handler *hander = loggingHandlerFile("test_log", 1024 * 1024 * 10);
-    addHandler(getDefaultLogger(), hander);
+    loggingAddHandler(loggingGetDefaultLogger(), hander);
 
     Log_info("This is an info message");
     Log_error("This is an error message%s", "123");
@@ -11,6 +11,6 @@ int main() {
     Log_debug("This is a debug message");
     Log_warning("This is a warning message%s", "123");
 
-    destroyDefaultLogger();
+    loggingDestroyAll();
     return 0;
 }
