@@ -1,8 +1,6 @@
 #include "logging.h"
 
 int main() {
-    Logger *logger = newDefaultLogger(__FILE__, LOG_DEBUG);
-
     Log_info("This is an info message");
     Log_error("This is an error message%s", "123");
     Log_fatal("This is an fatal message");
