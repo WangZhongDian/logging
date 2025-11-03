@@ -27,7 +27,7 @@ static Map *LOGGER_MAP     = NULL; // 日志对象映射表
  * @brief 为日志添加一个handler
  * @param handler 处理器对象
  */
-bool addHandler(Logger *logger, log_Handler *handler) {
+bool loggingAddHandler(Logger *logger, log_Handler *handler) {
     if (logger == NULL || handler == NULL) {
         return false;
     }
@@ -45,7 +45,7 @@ bool addHandler(Logger *logger, log_Handler *handler) {
  * @brief 为日志添加一个filter
  * @param filter 过滤器对象
  */
-bool addFilter(Logger *logger, log_filter *filter) {
+bool loggingAddFilter(Logger *logger, log_filter *filter) {
     if (logger == NULL || filter == NULL) {
         return false;
     }
@@ -142,16 +142,16 @@ log_cope(Logger *logger, char *level, const char *color, const char *message) {
     output_to_handler(logger, level, color, message);
 }
 
-void logMessage(Logger     *logger,
-                log_level   level,
-                const char *file,
-                int         line,
-                const char *message,
-                ...) {
+void loggingMessage(Logger     *logger,
+                    log_level   level,
+                    const char *file,
+                    int         line,
+                    const char *message,
+                    ...) {
     Logger *_logger = NULL;
     if (logger == NULL) {
         if (ROOT_LOGGER == NULL) {
-            ROOT_LOGGER = newLogger("ROOT"); // 创建根日志对象
+            ROOT_LOGGER = loggingNewLogger("ROOT"); // 创建根日志对象
         }
         _logger = ROOT_LOGGER;
     } else {
@@ -197,7 +197,7 @@ void logMessage(Logger     *logger,
  * @param name 日志器名称
  * @return 日志器对象
  */
-Logger *newLogger(const char *name) {
+Logger *loggingNewLogger(const char *name) {
     Logger *logger = (Logger *)malloc(sizeof(Logger));
     if (logger == NULL) {
         return NULL;
@@ -217,12 +217,12 @@ Logger *newLogger(const char *name) {
     return logger;
 }
 
-Logger *getDefaultLogger(void) {
+Logger *loggingGetDefaultLogger(void) {
     if (ROOT_LOGGER != NULL) {
         return ROOT_LOGGER;
     }
 
-    ROOT_LOGGER = newLogger("ROOT");
+    ROOT_LOGGER = loggingNewLogger("ROOT");
     return ROOT_LOGGER;
 }
 
@@ -232,7 +232,7 @@ Logger *getDefaultLogger(void) {
  * @param level 日志等级
  * @return 日志器对象
  */
-Logger *getLogger(const char *name) {
+Logger *loggingGetLogger(const char *name) {
     if (name == NULL) {
         return NULL;
     }
@@ -257,7 +257,7 @@ Logger *getLogger(const char *name) {
     return logger;
 }
 
-void destroyLogger(Logger *logger) {
+void loggingDestroyLogger(Logger *logger) {
     if (logger != NULL) {
         if (logger->handler != NULL) {
             logger->handler->_free(logger->handler);
@@ -280,13 +280,13 @@ static void
 __destroyLoggerForeach(const char *key, void *value, void *user_data) {
     (void)user_data;
     (void)key;
-    destroyLogger(*(Logger **)value);
+    loggingDestroyLogger(*(Logger **)value);
 }
 
 /**
  * @brief 销毁日志对象
  */
-void destroyDefaultLogger(void) {
+void loggingDestroyAll(void) {
     map_foreach(LOGGER_MAP, __destroyLoggerForeach, NULL);
     map_destroy(LOGGER_MAP);
 }
