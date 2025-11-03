@@ -7,6 +7,6 @@ int main() {
     Log_debug("This is a debug message");
     Log_warning("This is a warning message%s", "123");
 
-    destroyDefaultLogger();
+    loggingDestroyAll();
     return 0;
 }

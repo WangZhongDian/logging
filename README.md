@@ -53,7 +53,7 @@ int main() {
     Log_debug("This is a debug message");
     Log_warning("This is a warning message%s", "123");
 
-    destroyDefaultLogger();
+    loggingDestroyAll();
     return 0;
 }
 ```
@@ -65,7 +65,7 @@ int main() {
 
 int main() {
     log_Handler *hander = loggingHandlerFile("test_log", 1024 * 1024 * 10);
-    addHandler(getDefaultLogger(), hander);
+    loggingAddHandler(loggingGetDefaultLogger(), hander);
 
     Log_info("This is an info message");
     Log_error("This is an error message%s", "123");
@@ -73,7 +73,7 @@ int main() {
     Log_debug("This is a debug message");
     Log_warning("This is a warning message%s", "123");
 
-    destroyDefaultLogger();
+    loggingDestroyAll();
     return 0;
 }
 ```
@@ -107,7 +107,7 @@ int main() {
                             loggingHandlerFile("test_interceptor", 1024 * 1024),
                             false);
 
-    addFilter(getDefaultLogger(), tint);
+    loggingAddFilter(loggingGetDefaultLogger(), tint);
 
     char *test2[]     = {"123", NULL};
 
@@ -117,7 +117,7 @@ int main() {
         loggingHandlerFile("test_interceptor1", 1024 * 1024),
         true);
 
-    addFilter(getDefaultLogger(), tint1);
+    loggingAddFilter(loggingGetDefaultLogger(), tint1);
 
     printf("\n");
     printf("filter added\n");
@@ -129,7 +129,7 @@ int main() {
     Log_debug("This is a debug message");
     Log_warning("This is a warning message%s", "123");
 
-    destroyDefaultLogger();
+    loggingDestroyAll();
     return 0;
 }
 ```

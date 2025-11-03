@@ -5,7 +5,7 @@ import os
 
 class loggingRecipe(ConanFile):
     name = "logging"
-    version = "1.0.0"
+    version = "1.1.0"
     license = "MIT"
     author = "321640253@qq.com"
     url = "https://github.com/WangZhongDian/logging.git"
