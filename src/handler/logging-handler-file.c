@@ -48,7 +48,7 @@ static void outputFileHandler(log_Handler *handler, const char *message) {
     handler_ex->file_size += strlen(message);
     if (handler_ex->file_size > handler_ex->file_size_max) {
         changeFile(handler);
-}
+    }
 }
 
 log_Handler *loggingHandlerFile(const char *file_name, unsigned int max_size) {
@@ -65,7 +65,7 @@ log_Handler *loggingHandlerFile(const char *file_name, unsigned int max_size) {
         fp = fopen(new_file_name, "at");
         if (fp == NULL) {
             goto ERROR;
-}
+        }
         file_size = getFileSize(fp);
     } while (file_size > max_size);
 
@@ -74,7 +74,7 @@ log_Handler *loggingHandlerFile(const char *file_name, unsigned int max_size) {
                                     sizeof(log_Handler_file_ex_t));
     if (handler == NULL) {
         goto ERROR;
-}
+    }
 
     handler_ex                = Handler_file_EX_PRT(handler);
     handler_ex->file_size_max = max_size;
@@ -83,7 +83,7 @@ log_Handler *loggingHandlerFile(const char *file_name, unsigned int max_size) {
     handler_ex->file_name     = strdup(file_name);
     if (handler_ex->file_name == NULL) {
         goto ERROR;
-}
+    }
 
     handler->stream      = fp;
     handler->apply_color = false;
@@ -94,7 +94,7 @@ log_Handler *loggingHandlerFile(const char *file_name, unsigned int max_size) {
 ERROR:
     if (fp) {
         fclose(fp);
-}
+    }
     if (handler) {
         free(Handler_file_EX_PRT(handler)->file_name); // 直接释放，无需检查NULL
         free(handler);
