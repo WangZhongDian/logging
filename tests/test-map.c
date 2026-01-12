@@ -1,6 +1,5 @@
 #include "utils/logging-map.h"
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 void foreach_callback(const char *key, void *value, void *user_data) {
